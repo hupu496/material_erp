@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
 
     path('master/', views.material_master, name='material_master'),
+    path('load-subcategory/', views.load_subcategory, name='load_subcategory'),
     path('receipt/', views.material_receipt, name='material_receipt'),
     path('requisition/', views.material_requisition, name='material_requisition'),
     path('outward/', views.material_outward, name='material_outward'),

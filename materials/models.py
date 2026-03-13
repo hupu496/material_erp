@@ -1,7 +1,5 @@
 from django.db import models
 from masters.models import *
-
-
 class MaterialMaster(models.Model):
 
     category = models.ForeignKey(Category,on_delete=models.CASCADE)

@@ -42,7 +42,12 @@ def material_master(request):
         'data': data
     })
 
+def load_subcategory(request):
+    category_id = request.GET.get('category')
 
+    subcategory = SubCategory.objects.filter(category_id=category_id).values('id','sub_category')
+
+    return JsonResponse(list(subcategory), safe=False)
 def material_receipt(request):
     return render(request, 'materials/material_receipt.html')
 

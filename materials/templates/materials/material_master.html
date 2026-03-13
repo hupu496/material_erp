@@ -22,10 +22,9 @@
 
 <label>Sub Category</label>
 <select id="subcategory" name="subcategory" class="form-control">
-<option value="">Select</option>
-{% for s in subcategory %}
-<option value="{{s.id}}">{{s.name}}</option>
-{% endfor %}
+
+<option value="">Select SubCategory</option>
+
 </select>
 
 <br>
@@ -119,6 +118,32 @@
 
 {% endfor %}
 
-</table>
+</table><script>
 
+document.getElementById("category").addEventListener("change", function(){
+
+    var categoryId = this.value;
+
+    fetch("/materials/load-subcategory/?category="+categoryId)
+
+    .then(response => response.json())
+
+    .then(data => {
+
+        let subcategory = document.getElementById("subcategory");
+
+        subcategory.innerHTML = '<option value="">Select SubCategory</option>';
+
+        data.forEach(function(item){
+
+            subcategory.innerHTML +=
+            `<option value="${item.id}">${item.sub_category}</option>`;
+
+        });
+
+    });
+
+});
+
+</script>
 {% endblock %}
