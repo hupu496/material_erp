@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Material Master</h2>
+
+<form method="POST" enctype="multipart/form-data">
+{% csrf_token %}
+
+<div class="row">
+
+<div class="col-md-8">
+
+<label>Category</label>
+<select id="category" name="category" class="form-control">
+<option value="">Select</option>
+{% for c in category %}
+<option value="{{c.id}}">{{c.name}}</option>
+{% endfor %}
+</select>
+
+<br>
+
+<label>Sub Category</label>
+<select id="subcategory" name="subcategory" class="form-control">
+<option value="">Select</option>
+{% for s in subcategory %}
+<option value="{{s.id}}">{{s.name}}</option>
+{% endfor %}
+</select>
+
+<br>
+
+<label>Work Spots</label>
+<select name="workspots" class="form-control">
+<option value="">Select</option>
+{% for w in workspots %}
+<option value="{{w.id}}">{{w.name}}</option>
+{% endfor %}
+</select>
+
+<br>
+
+<input name="description" class="form-control" placeholder="Description">
+<br>
+
+<label>Units</label>
+<select name="units" class="form-control">
+<option value="">Select</option>
+{% for u in units %}
+<option value="{{u.id}}">{{u.name}}</option>
+{% endfor %}
+</select>
+
+<br>
+
+<input name="rate" class="form-control" placeholder="Rate">
+<br>
+
+<input name="quantity" class="form-control" placeholder="Quantity">
+<br>
+
+<input name="rackno" class="form-control" placeholder="Rack No">
+<br>
+
+<input name="qty" class="form-control" placeholder="Qty">
+<br>
+
+<input name="critical_qty" class="form-control" placeholder="Critical Qty">
+
+</div>
+
+<div class="col-md-4">
+
+<label>Photo</label>
+<input type="file" name="photo" class="form-control">
+
+</div>
+
+</div>
+
+<br>
+
+<button class="btn btn-success">Save Material</button>
+
+</form>
+
+<hr>
+
+<h3>Material List</h3>
+
+<table border="1" width="100%">
+<tr>
+<th>ID</th>
+<th>Category</th>
+<th>Sub Category</th>
+<th>Description</th>
+<th>Qty</th>
+<th>Rate</th>
+<th>Photo</th>
+</tr>
+
+{% for row in data %}
+
+<tr>
+<td>{{row.id}}</td>
+<td>{{row.category.name}}</td>
+<td>{{row.sub_category.name}}</td>
+<td>{{row.description}}</td>
+<td>{{row.quantity}}</td>
+<td>{{row.rate}}</td>
+
+<td>
+{% if row.photo %}
+<img src="{{row.photo.url}}" width="60">
+{% endif %}
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+{% endblock %}

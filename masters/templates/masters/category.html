@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Category Master</h2>
+
+<form method="POST">
+{% csrf_token %}
+
+<input type="text" name="name"
+value="{% if edit %}{{ edit.name }}{% endif %}"
+placeholder="Enter Category Name">
+
+<button type="submit">{% if edit %}
+Update
+{% else %}
+Save
+{% endif %}</button>
+
+</form>
+
+<hr>
+
+<h3>Category List</h3>
+
+<table border="1">
+
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Action</th>
+</tr>
+
+{% for i in data %}
+
+<tr>
+<td>{{i.id}}</td>
+<td>{{i.name}}</td>
+<td>
+<a href="{% url 'category_edit' i.id %}">Edit</a> |
+
+<a href="{% url 'category_delete' i.id %}"
+onclick="return confirm('Are you sure?')">Delete</a>
+</td>
+</tr>
+
+{% endfor %}
+
+</table>
+{% endblock %}
+

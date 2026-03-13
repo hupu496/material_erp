@@ -1,0 +1,30 @@
+<form method="post">
+{% csrf_token %}
+
+<label>Category</label>
+
+<select name="category" class="form-control">
+
+{% for c in categories %}
+
+<option value="{{c.id}}">
+{{c.name}}
+</option>
+
+{% endfor %}
+
+</select>
+
+<label>Sub Category</label>
+
+<input type="text"
+name="sub_category"
+class="form-control">
+
+<br>
+
+<button class="btn btn-success">
+Save
+</button>
+
+</form>
