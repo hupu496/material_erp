@@ -1,149 +1,453 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h2>Material Master</h2>
+<style>
+    .material-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .camera-section {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .camera-preview {
+        width: 100%;
+        max-width: 300px;
+        border-radius: 10px;
+        border: 3px solid #fff;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        margin: 1rem auto;
+        display: none;
+    }
+    
+    .camera-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 25px;
+        margin: 5px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+    
+    .camera-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .photo-preview {
+        width: 100%;
+        max-width: 200px;
+        border-radius: 10px;
+        margin-top: 1rem;
+        border: 3px solid #667eea;
+    }
+    
+    .table-modern {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    .table-modern thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .table-modern th {
+        padding: 1rem;
+        font-weight: 500;
+        border: none;
+    }
+    
+    .table-modern td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+    
+    .table-modern tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .material-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+    }
+    
+    .btn-save {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+    
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .form-control-modern {
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 10px 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control-modern:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .floating-label {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    
+    .floating-label input {
+        height: 50px;
+    }
+    
+    .floating-label label {
+        position: absolute;
+        top: -10px;
+        left: 15px;
+        background: white;
+        padding: 0 5px;
+        font-size: 0.85rem;
+        color: #667eea;
+        font-weight: 500;
+    }
+</style>
 
-<form method="POST" enctype="multipart/form-data">
-{% csrf_token %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="material-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="display-4 fw-bold">Material Master</h1>
+                <p class="lead">Manage your inventory with ease</p>
+            </div>
+            <div>
+                <span class="material-badge">Total Items: {{data|length}}</span>
+            </div>
+        </div>
+    </div>
 
-<div class="row">
+    <!-- Form Section -->
+    <div class="form-card">
+        <form method="POST" enctype="multipart/form-data" id="materialForm">
+            {% csrf_token %}
+            
+            <div class="row">
+                <!-- Left Column - Form Fields -->
+                <div class="col-md-8">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="floating-label">
+                                <label>Category</label>
+                                <select id="category" name="category" class="form-control form-control-modern">
+                                    <option value="">Select Category</option>
+                                    {% for c in category %}
+                                    <option value="{{c.id}}">{{c.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="floating-label">
+                                <label>Sub Category</label>
+                                <select id="subcategory" name="subcategory" class="form-control form-control-modern">
+                                    <option value="">Select SubCategory</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="floating-label">
+                                <label>Work Spots</label>
+                                <select name="workspots" class="form-control form-control-modern">
+                                    <option value="">Select Work Spot</option>
+                                    {% for w in workspots %}
+                                    <option value="{{w.id}}">{{w.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="floating-label">
+                                <label>Units</label>
+                                <select name="units" class="form-control form-control-modern">
+                                    <option value="">Select Unit</option>
+                                    {% for u in units %}
+                                    <option value="{{u.id}}">{{u.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-12">
+                            <div class="floating-label">
+                                <label>Description</label>
+                                <input name="description" class="form-control form-control-modern" placeholder="Enter description">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="floating-label">
+                                <label>Rate</label>
+                                <input name="rate" class="form-control form-control-modern" placeholder="Enter rate" type="number">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="floating-label">
+                                <label>Quantity</label>
+                                <input name="quantity" class="form-control form-control-modern" placeholder="Enter quantity" type="number">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="floating-label">
+                                <label>Rack No</label>
+                                <input name="rackno" class="form-control form-control-modern" placeholder="Rack number">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="floating-label">
+                                <label>Qty</label>
+                                <input name="qty" class="form-control form-control-modern" placeholder="Quantity" type="number">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="floating-label">
+                                <label>Critical Qty</label>
+                                <input name="critical_qty" class="form-control form-control-modern" placeholder="Critical quantity" type="number">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column - Camera Section -->
+                <div class="col-md-4">
+                    <div class="camera-section">
+                        <h4 class="mb-3">📸 Capture Photo</h4>
+                        
+                        <!-- Camera Preview -->
+                        <video id="camera-preview" class="camera-preview" autoplay playsinline></video>
+                        
+                        <!-- Captured Image Preview -->
+                        <div id="captured-image-container">
+                            <img id="captured-image" class="photo-preview" style="display: none;">
+                        </div>
+                        
+                        <!-- Camera Controls -->
+                        <div class="mt-3">
+                            <button type="button" class="camera-btn" id="start-camera">
+                                <i class="fas fa-camera"></i> Open Camera
+                            </button>
+                            <button type="button" class="camera-btn" id="capture-photo" style="display: none;">
+                                <i class="fas fa-camera-retro"></i> Capture
+                            </button>
+                            <button type="button" class="camera-btn" id="close-camera" style="display: none;">
+                                <i class="fas fa-times"></i> Close
+                            </button>
+                        </div>
+                        
+                        <!-- File Upload Alternative -->
+                        <div class="mt-3">
+                            <p class="text-muted">Or upload from device</p>
+                            <input type="file" name="photo" id="photo-upload" class="form-control" accept="image/*">
+                        </div>
+                        
+                        <!-- Hidden input for captured image data -->
+                        <input type="hidden" name="captured_photo" id="captured-photo-data">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Save Button -->
+            <div class="text-center mt-4">
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-save"></i> Save Material
+                </button>
+            </div>
+        </form>
+    </div>
 
-<div class="col-md-8">
-
-<label>Category</label>
-<select id="category" name="category" class="form-control">
-<option value="">Select</option>
-{% for c in category %}
-<option value="{{c.id}}">{{c.name}}</option>
-{% endfor %}
-</select>
-
-<br>
-
-<label>Sub Category</label>
-<select id="subcategory" name="subcategory" class="form-control">
-
-<option value="">Select SubCategory</option>
-
-</select>
-
-<br>
-
-<label>Work Spots</label>
-<select name="workspots" class="form-control">
-<option value="">Select</option>
-{% for w in workspots %}
-<option value="{{w.id}}">{{w.name}}</option>
-{% endfor %}
-</select>
-
-<br>
-
-<input name="description" class="form-control" placeholder="Description">
-<br>
-
-<label>Units</label>
-<select name="units" class="form-control">
-<option value="">Select</option>
-{% for u in units %}
-<option value="{{u.id}}">{{u.name}}</option>
-{% endfor %}
-</select>
-
-<br>
-
-<input name="rate" class="form-control" placeholder="Rate">
-<br>
-
-<input name="quantity" class="form-control" placeholder="Quantity">
-<br>
-
-<input name="rackno" class="form-control" placeholder="Rack No">
-<br>
-
-<input name="qty" class="form-control" placeholder="Qty">
-<br>
-
-<input name="critical_qty" class="form-control" placeholder="Critical Qty">
-
+    <!-- Material List Section -->
+    <div class="table-modern">
+        <h3 class="p-3 mb-0 bg-light">📦 Material Inventory</h3>
+        <table class="table table-modern mb-0">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Category</th>
+                    <th>Sub Category</th>
+                    <th>Description</th>
+                    <th>Qty</th>
+                    <th>Rate</th>
+                    <th>Photo</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in data %}
+                <tr>
+                    <td><span class="badge bg-primary">#{{row.id}}</span></td>
+                    <td>{{row.category.name}}</td>
+                    <td>{{row.sub_category.name}}</td>
+                    <td>{{row.description}}</td>
+                    <td>{{row.quantity}}</td>
+                    <td>${{row.rate}}</td>
+                    <td>
+                        {% if row.photo %}
+                        <img src="{{row.photo.url}}" width="50" height="50" style="border-radius: 10px; object-fit: cover;">
+                        {% else %}
+                        <span class="badge bg-secondary">No Image</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center py-4">
+                        <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No materials found</h5>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<div class="col-md-4">
-
-<label>Photo</label>
-<input type="file" name="photo" class="form-control">
-
-</div>
-
-</div>
-
-<br>
-
-<button class="btn btn-success">Save Material</button>
-
-</form>
-
-<hr>
-
-<h3>Material List</h3>
-
-<table border="1" width="100%">
-<tr>
-<th>ID</th>
-<th>Category</th>
-<th>Sub Category</th>
-<th>Description</th>
-<th>Qty</th>
-<th>Rate</th>
-<th>Photo</th>
-</tr>
-
-{% for row in data %}
-
-<tr>
-<td>{{row.id}}</td>
-<td>{{row.category.name}}</td>
-<td>{{row.sub_category.name}}</td>
-<td>{{row.description}}</td>
-<td>{{row.quantity}}</td>
-<td>{{row.rate}}</td>
-
-<td>
-{% if row.photo %}
-<img src="{{row.photo.url}}" width="60">
-{% endif %}
-</td>
-
-</tr>
-
-{% endfor %}
-
-</table><script>
-
-document.getElementById("category").addEventListener("change", function(){
-
-    var categoryId = this.value;
-
-    fetch("/materials/load-subcategory/?category="+categoryId)
-
-    .then(response => response.json())
-
-    .then(data => {
-
-        let subcategory = document.getElementById("subcategory");
-
-        subcategory.innerHTML = '<option value="">Select SubCategory</option>';
-
-        data.forEach(function(item){
-
-            subcategory.innerHTML +=
-            `<option value="${item.id}">${item.sub_category}</option>`;
-
+<!-- Camera JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Category Subcategory AJAX
+    document.getElementById("category").addEventListener("change", function() {
+        var categoryId = this.value;
+        fetch("/materials/load-subcategory/?category=" + categoryId)
+        .then(response => response.json())
+        .then(data => {
+            let subcategory = document.getElementById("subcategory");
+            subcategory.innerHTML = '<option value="">Select SubCategory</option>';
+            data.forEach(function(item) {
+                subcategory.innerHTML += `<option value="${item.id}">${item.sub_category}</option>`;
+            });
         });
-
     });
 
+    // Camera functionality
+    const startCamera = document.getElementById('start-camera');
+    const capturePhoto = document.getElementById('capture-photo');
+    const closeCamera = document.getElementById('close-camera');
+    const cameraPreview = document.getElementById('camera-preview');
+    const capturedImage = document.getElementById('captured-image');
+    const photoUpload = document.getElementById('photo-upload');
+    const capturedPhotoData = document.getElementById('captured-photo-data');
+    
+    let stream = null;
+    let mediaRecorder = null;
+    
+    startCamera.addEventListener('click', async function() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            cameraPreview.srcObject = stream;
+            cameraPreview.style.display = 'block';
+            startCamera.style.display = 'none';
+            capturePhoto.style.display = 'inline-block';
+            closeCamera.style.display = 'inline-block';
+        } catch (err) {
+            alert('Error accessing camera: ' + err.message);
+        }
+    });
+    
+    capturePhoto.addEventListener('click', function() {
+        const canvas = document.createElement('canvas');
+        canvas.width = cameraPreview.videoWidth;
+        canvas.height = cameraPreview.videoHeight;
+        canvas.getContext('2d').drawImage(cameraPreview, 0, 0);
+        
+        const imageData = canvas.toDataURL('image/jpeg');
+        capturedImage.src = imageData;
+        capturedImage.style.display = 'block';
+        capturedPhotoData.value = imageData;
+        
+        // Stop camera
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            cameraPreview.srcObject = null;
+            cameraPreview.style.display = 'none';
+            startCamera.style.display = 'inline-block';
+            capturePhoto.style.display = 'none';
+            closeCamera.style.display = 'none';
+        }
+    });
+    
+    closeCamera.addEventListener('click', function() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            cameraPreview.srcObject = null;
+            cameraPreview.style.display = 'none';
+            startCamera.style.display = 'inline-block';
+            capturePhoto.style.display = 'none';
+            closeCamera.style.display = 'none';
+        }
+    });
+    
+    // Handle file upload
+    photoUpload.addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                capturedImage.src = e.target.result;
+                capturedImage.style.display = 'block';
+                capturedPhotoData.value = e.target.result;
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
 });
-
 </script>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
 {% endblock %}

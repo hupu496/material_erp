@@ -1,127 +1,806 @@
+{% load static %}
+
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Material ERP Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-<title>Material Inventory ERP</title>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
 
-<link rel="stylesheet"
-href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+        body {
+            background: #f4f7fc;
+            min-height: 100vh;
+        }
 
+        /* Main Layout */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, #1e1e2f 0%, #2d2d44 100%);
+            color: white;
+            padding: 2rem 1.5rem;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            box-shadow: 5px 0 20px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-header i {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem;
+            border-radius: 20px;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-header h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            color: white;
+        }
+
+        .sidebar-header p {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 0.8rem 1.2rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .nav-link i {
+            width: 24px;
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.6);
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-link:hover i {
+            color: white;
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-link.active i {
+            color: white;
+        }
+
+        .nav-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            margin: 1.5rem 0;
+        }
+
+        .nav-section-title {
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            padding-left: 0.5rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+        }
+
+        /* Top Header */
+        .top-header {
+            background: white;
+            border-radius: 20px;
+            padding: 1rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            padding: 0.6rem 1rem 0.6rem 2.5rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 30px;
+            width: 300px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            outline: none;
+            width: 350px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .notification-badge {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .notification-badge i {
+            font-size: 1.5rem;
+            color: #666;
+        }
+
+        .badge-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
+            background: #f8f9fa;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-profile:hover {
+            background: #e9ecef;
+        }
+
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-info h6 {
+            margin: 0;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .user-info p {
+            margin: 0;
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-radius: 50%;
+            transition: all 0.5s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .stat-card:hover::before {
+            transform: scale(1.5);
+        }
+
+        .stat-info h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+            color: #333;
+        }
+
+        .stat-info p {
+            color: #666;
+            margin: 5px 0 0;
+            font-weight: 500;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-header h5 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .chart-header select {
+            padding: 0.4rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            color: #333;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .quick-actions h5 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-btn {
+            padding: 1rem;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 12px;
+            color: #333;
+            font-weight: 500;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn i {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .action-btn:hover i {
+            background: white;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Recent Activity */
+        .recent-activity {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+
+        .activity-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            background: #f0f3ff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667eea;
+        }
+
+        .activity-details {
+            flex: 1;
+        }
+
+        .activity-details p {
+            margin: 0;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .activity-details small {
+            color: #999;
+            font-size: 0.75rem;
+        }
+
+        .activity-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: #e1f7e3;
+            color: #0e7b32;
+        }
+
+        .status-warning {
+            background: #fff4e5;
+            color: #b45b0b;
+        }
+
+        .status-info {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 80px;
+                padding: 1rem 0.5rem;
+            }
+
+            .sidebar-header h3,
+            .sidebar-header p,
+            .nav-link span,
+            .nav-section-title {
+                display: none;
+            }
+
+            .nav-link {
+                justify-content: center;
+                padding: 1rem;
+            }
+
+            .nav-link i {
+                margin: 0;
+            }
+
+            .main-content {
+                margin-left: 80px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .top-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .search-box input {
+                width: 200px;
+            }
+
+            .search-box input:focus {
+                width: 250px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            to {
+                left: 100%;
+            }
+        }
+    </style>
 </head>
-
 <body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-cubes"></i>
+                <h3>Material ERP</h3>
+                <p>Inventory Management System</p>
+            </div>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="nav-section-title">MAIN MENU</div>
+            
+            <div class="nav-item">
+                <a href="/dashboard/" class="nav-link active">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
 
-<div class="container-fluid">
+            <div class="nav-section-title">MASTERS</div>
+            
+            <div class="nav-item">
+                <a href="/masters/category/" class="nav-link">
+                    <i class="fas fa-tags"></i>
+                    <span>Category</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="/masters/subcategory/" class="nav-link">
+                    <i class="fas fa-sitemap"></i>
+                    <span>SubCategory</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="/masters/unit/" class="nav-link">
+                    <i class="fas fa-balance-scale"></i>
+                    <span>Unit Master</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="/masters/seller-type/" class="nav-link">
+                    <i class="fas fa-store"></i>
+                    <span>Seller Type</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="/masters/work-spots/" class="nav-link">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Work Spots</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="/masters/party-master/" class="nav-link">
+                    <i class="fas fa-users"></i>
+                    <span>Party Master</span>
+                </a>
+            </div>
 
-<a class="navbar-brand" href="/">Material ERP</a>
+            <div class="nav-divider"></div>
 
-<button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-data-bs-target="#navbarNav">
+            <div class="nav-section-title">MATERIALS</div>
 
-<span class="navbar-toggler-icon"></span>
+            <div class="nav-item">
+                <a href="/materials/master/" class="nav-link">
+                    <i class="fas fa-cubes"></i>
+                    <span>Material Master</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="/materials/receipt/" class="nav-link">
+                    <i class="fas fa-download"></i>
+                    <span>Material Receipt</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="/materials/requisition/" class="nav-link">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Requisition</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="/materials/outward/" class="nav-link">
+                    <i class="fas fa-upload"></i>
+                    <span>Material Outward</span>
+                </a>
+            </div>
 
-</button>
+            <div class="nav-divider"></div>
 
-<div class="collapse navbar-collapse" id="navbarNav">
+            <div class="nav-item">
+                <a href="/reports/" class="nav-link">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Reports</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="/settings/" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+        </div>
 
-<ul class="navbar-nav">
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Header -->
+            <div class="top-header">
+                <h2 class="page-title">Dashboard Overview</h2>
+                
+                <div class="header-actions">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search materials, categories...">
+                    </div>
+                    
+                    <div class="notification-badge">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge-count">3</span>
+                    </div>
+                    
+                    <div class="user-profile">
+                        <img src="https://ui-avatars.com/api/?name=Admin+User&background=667eea&color=fff&size=40" alt="Profile">
+                        <div class="user-info">
+                            <h6>Admin User</h6>
+                            <p>Administrator</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-<!-- Masters Dropdown -->
+            <!-- Stats Cards -->
+          {% block content %}
 
-<li class="nav-item dropdown">
 
-<a class="nav-link dropdown-toggle" href="#" role="button"
-data-bs-toggle="dropdown">
+             {% endblock %}
+            </div>
 
-Masters
+            <!-- Charts Section -->
+            
 
-</a>
+            <!-- Quick Actions -->
+            
 
-<ul class="dropdown-menu">
+            <!-- Recent Activity -->
+            
+        </div>
+    </div>
 
-<li>
-<a class="dropdown-item" href="/masters/category/">Category</a>
-</li>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Movement Chart
+        const ctx1 = document.getElementById('movementChart').getContext('2d');
+        new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Received',
+                    data: [65, 78, 90, 85, 92, 88, 95],
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'Issued',
+                    data: [45, 52, 68, 70, 65, 72, 80],
+                    borderColor: '#764ba2',
+                    backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            display: true,
+                            color: 'rgba(0,0,0,0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
 
-<li>
-<a class="dropdown-item" href="/masters/subcategory/">SubCategory</a>
-</li>
-
-<li>
-<a class="dropdown-item" href="/masters/unit/">Unit Master</a>
-</li>
-
-<li>
-<a class="dropdown-item" href="/masters/seller-type/">Type Of Seller</a>
-</li>
-
-<li>
-<a class="dropdown-item" href="/masters/work-spots/">Work Spots</a>
-</li>
-
-<li>
-<a class="dropdown-item" href="/masters/party-master/">Party Master</a>
-</li>
-
-</ul>
-
-</li>
-
-<!-- Materials -->
-
-<li class="nav-item">
-
-<a class="nav-link" href="/materials/master/">Material Master</a>
-
-</li>
-
-<li class="nav-item">
-
-<a class="nav-link" href="/materials/receipt/">Material Receipt</a>
-
-</li>
-
-<li class="nav-item">
-
-<a class="nav-link" href="/materials/requisition/">Material Requisition</a>
-
-</li>
-
-<li class="nav-item">
-
-<a class="nav-link" href="/materials/outward/">Material Outward</a>
-
-</li>
-
-<!-- Reports -->
-
-<li class="nav-item">
-
-<a class="nav-link" href="/reports/">Reports</a>
-
-</li>
-
-</ul>
-
-</div>
-
-</div>
-
-</nav>
-
-<div class="container mt-4">
-
-{% block content %}
-
-{% endblock %}
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+        // Distribution Chart
+        const ctx2 = document.getElementById('distributionChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: ['Raw Materials', 'Finished Goods', 'Work in Progress', 'Packaging'],
+                datasets: [{
+                    data: [45, 25, 20, 10],
+                    backgroundColor: [
+                        '#667eea',
+                        '#764ba2',
+                        '#f093fb',
+                        '#f5576c'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+    </script>
 </body>
-
 </html>
