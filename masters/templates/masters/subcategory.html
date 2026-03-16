@@ -2,79 +2,1152 @@
 
 {% block content %}
 
-<h2>Sub Category Master</h2>
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --success-gradient: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        --warning-gradient: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        --danger-gradient: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+        --info-gradient: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+    }
 
-<form method="POST">
-{% csrf_token %}
+    /* Page Header with Animation */
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2.5rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
+        animation: headerGlow 3s ease-in-out infinite;
+    }
 
-<select name="category">
+    @keyframes headerGlow {
+        0%, 100% { box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3); }
+        50% { box-shadow: 0 20px 40px rgba(102, 126, 234, 0.5); }
+    }
 
-<option value="">Select Category</option>
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 8s ease-in-out infinite;
+    }
 
-{% for c in category %}
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: -50%;
+        left: -10%;
+        width: 250px;
+        height: 250px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 10s ease-in-out infinite reverse;
+    }
 
-<option value="{{c.id}}"
-{% if edit.category.id == c.id %}
-selected
-{% endif %}
->
-{{c.name}}
-</option>
+    @keyframes float {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        33% { transform: translate(40px, -40px) rotate(120deg); }
+        66% { transform: translate(-30px, 30px) rotate(240deg); }
+    }
 
-{% endfor %}
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+    }
 
-</select>
+    .header-title h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
 
-<input type="text" name="sub_category"
-value="{% if edit %}{{edit.sub_category}}{% endif %}"
-placeholder="Enter Sub Category">
+    .header-title p {
+        margin: 0.5rem 0 0;
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
 
-<button type="submit">
+    .header-stats {
+        display: flex;
+        gap: 2rem;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
 
-{% if edit %}
-Update
-{% else %}
-Save
-{% endif %}
+    .stat-item {
+        text-align: center;
+    }
 
-</button>
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1;
+    }
 
-</form>
+    .stat-label {
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
 
-<hr>
+    /* Form Card with 3D Effect */
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        transform: perspective(1000px) rotateX(0deg);
+        transition: all 0.3s ease;
+        animation: cardFloat 0.5s ease-out;
+    }
 
-<h3>SubCategory List</h3>
+    @keyframes cardFloat {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 
-<table border="1">
+    .form-card:hover {
+        transform: translateY(-5px) perspective(1000px) rotateX(2deg);
+        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);
+    }
 
-<tr>
-<th>ID</th>
-<th>Category</th>
-<th>SubCategory</th>
-<th>Action</th>
-</tr>
+    .form-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f0f0f0;
+        position: relative;
+    }
 
-{% for i in data %}
+    .form-title i {
+        font-size: 2rem;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: iconSpin 4s linear infinite;
+    }
 
-<tr>
+    @keyframes iconSpin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
 
-<td>{{i.id}}</td>
-<td>{{i.category.name}}</td>
-<td>{{i.sub_category}}</td>
+    .form-title h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+        margin: 0;
+    }
 
-<td>
+    .form-title .badge {
+        position: absolute;
+        right: 0;
+        background: var(--primary-gradient);
+        color: white;
+        padding: 0.3rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+    }
 
-<a href="{% url 'subcategory_edit' i.id %}">Edit</a> |
+    /* Modern Select Input */
+    .select-group-modern {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
 
-<a href="{% url 'subcategory_delete' i.id %}"
-onclick="return confirm('Are you sure?')">Delete</a>
+    .select-group-modern i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #667eea;
+        font-size: 1.2rem;
+        z-index: 10;
+        pointer-events: none;
+    }
 
-</td>
+    .select-modern {
+        width: 100%;
+        padding: 1rem 1rem 1rem 45px;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+        appearance: none;
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23667eea' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+        background-size: 16px;
+    }
 
-</tr>
+    .select-modern:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
 
-{% endfor %}
+    /* Category Option Styling */
+    .select-modern option {
+        padding: 10px;
+        font-size: 1rem;
+    }
 
-</table>
+    .select-modern optgroup {
+        font-weight: 600;
+        color: #667eea;
+    }
+
+    /* Input Group */
+    .input-group-modern {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .input-group-modern i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #667eea;
+        font-size: 1.2rem;
+        z-index: 10;
+    }
+
+    .input-modern {
+        width: 100%;
+        padding: 1rem 1rem 1rem 45px;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .input-modern:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+
+    .input-modern::placeholder {
+        color: #999;
+        font-weight: 300;
+    }
+
+    /* Button Styles */
+    .btn-modern {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+        overflow: hidden;
+        text-decoration: none;
+    }
+
+    .btn-modern::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-modern:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-save {
+        background: var(--primary-gradient);
+        color: white;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-update {
+        background: var(--warning-gradient);
+        color: white;
+        box-shadow: 0 5px 15px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+        box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+        margin-left: 1rem;
+    }
+
+    /* Table Card */
+    .table-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        animation: cardFloat 0.7s ease-out;
+    }
+
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .table-header h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .table-header h3 i {
+        color: #667eea;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    .search-box {
+        position: relative;
+    }
+
+    .search-box input {
+        padding: 0.7rem 1rem 0.7rem 2.5rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 30px;
+        width: 300px;
+        transition: all 0.3s ease;
+    }
+
+    .search-box input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        outline: none;
+        width: 350px;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #999;
+    }
+
+    .filter-badge {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .filter-tag {
+        background: #f0f3ff;
+        color: #667eea;
+        padding: 0.3rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .filter-tag:hover {
+        background: var(--primary-gradient);
+        color: white;
+    }
+
+    .filter-tag.active {
+        background: var(--primary-gradient);
+        color: white;
+    }
+
+    /* Modern Table */
+    .table-modern {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+
+    .table-modern thead th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem;
+        font-weight: 600;
+        border: none;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .table-modern thead th:first-child {
+        border-radius: 10px 0 0 10px;
+    }
+
+    .table-modern thead th:last-child {
+        border-radius: 0 10px 10px 0;
+    }
+
+    .table-modern tbody tr {
+        background: white;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .table-modern tbody tr::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: var(--primary-gradient);
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .table-modern tbody tr:hover::before {
+        transform: scaleY(1);
+    }
+
+    .table-modern tbody tr:hover {
+        transform: translateX(5px) translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .table-modern tbody td {
+        padding: 1.2rem 1rem;
+        border: none;
+        color: #555;
+    }
+
+    .table-modern tbody td:first-child {
+        border-radius: 10px 0 0 10px;
+    }
+
+    .table-modern tbody td:last-child {
+        border-radius: 0 10px 10px 0;
+    }
+
+    /* Badge Styles */
+    .id-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+        box-shadow: 0 2px 5px rgba(102, 126, 234, 0.3);
+    }
+
+    .category-badge {
+        background: #f0f3ff;
+        color: #667eea;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .category-badge i {
+        font-size: 0.8rem;
+    }
+
+    .subcategory-name {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 500;
+    }
+
+    .subcategory-name i {
+        color: #667eea;
+        font-size: 1.1rem;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .btn-action {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-action::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-action:hover::before {
+        width: 100px;
+        height: 100px;
+    }
+
+    .btn-action i {
+        position: relative;
+        z-index: 1;
+    }
+
+    .btn-edit {
+        background: var(--warning-gradient);
+        box-shadow: 0 3px 10px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-delete {
+        background: var(--danger-gradient);
+        box-shadow: 0 3px 10px rgba(220, 38, 38, 0.3);
+    }
+
+    .btn-view {
+        background: var(--info-gradient);
+        box-shadow: 0 3px 10px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background: #f8f9fa;
+        border-radius: 15px;
+        animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1rem;
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .empty-state p {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-add-first {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 0.8rem 2rem;
+        border-radius: 30px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-add-first:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        color: white;
+    }
+
+    /* Toast Notification */
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+    }
+
+    .toast {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 10px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transform: translateX(400px);
+        transition: transform 0.3s ease;
+        border-left: 4px solid #667eea;
+        min-width: 300px;
+    }
+
+    .toast.show {
+        transform: translateX(0);
+    }
+
+    .toast i {
+        font-size: 1.5rem;
+    }
+
+    .toast-success i { color: #10b981; }
+    .toast-error i { color: #ef4444; }
+    .toast-warning i { color: #f59e0b; }
+
+    .toast-content {
+        flex: 1;
+    }
+
+    .toast-content h6 {
+        margin: 0;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .toast-content p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .toast-close {
+        cursor: pointer;
+        color: #999;
+        transition: color 0.3s ease;
+    }
+
+    .toast-close:hover {
+        color: #333;
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
+        width: 0%;
+        z-index: 10000;
+        transition: width 0.3s ease;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .header-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .header-stats {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .table-header {
+            flex-direction: column;
+        }
+
+        .search-box input {
+            width: 100%;
+        }
+
+        .search-box input:focus {
+            width: 100%;
+        }
+
+        .table-modern {
+            display: block;
+            overflow-x: auto;
+        }
+
+        .form-card {
+            padding: 1.5rem;
+        }
+
+        .btn-modern {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-cancel {
+            margin-left: 0;
+            margin-top: 1rem;
+            width: 100%;
+        }
+    }
+</style>
+
+<!-- Progress Bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="header-content">
+        <div class="header-title">
+            <h2>
+                <i class="fas fa-sitemap"></i>
+                SubCategory Master
+            </h2>
+            <p>Organize your categories with detailed subcategories</p>
+        </div>
+        <div class="header-stats">
+            <div class="stat-item">
+                <div class="stat-value">{{ data|length }}</div>
+                <div class="stat-label">Total</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ category|length }}</div>
+                <div class="stat-label">Categories</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{% if edit %}1{% else %}0{% endif %}</div>
+                <div class="stat-label">Editing</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Form Card -->
+<div class="form-card">
+    <div class="form-title">
+        <i class="fas {% if edit %}fa-edit{% else %}fa-plus-circle{% endif %}"></i>
+        <h3>{% if edit %}Edit SubCategory{% else %}Add New SubCategory{% endif %}</h3>
+        <span class="badge">{% if edit %}Update Mode{% else %}Create Mode{% endif %}</span>
+    </div>
+
+    <form method="POST" id="subcategoryForm">
+        {% csrf_token %}
+        
+        <div class="select-group-modern">
+            <i class="fas fa-folder"></i>
+            <select name="category" class="select-modern" required>
+                <option value="" disabled {% if not edit %}selected{% endif %}>Select Category</option>
+                {% regroup category by name|slice:":1" as category_groups %}
+                {% for group in category_groups %}
+                    <optgroup label="{{ group.grouper }}">
+                    {% for c in group.list %}
+                        <option value="{{c.id}}" 
+                            {% if edit.category.id == c.id %}selected{% endif %}
+                            data-icon="📁">
+                            {{c.name}}
+                        </option>
+                    {% endfor %}
+                    </optgroup>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="input-group-modern">
+            <i class="fas fa-tag"></i>
+            <input type="text" name="sub_category" class="input-modern" 
+                   value="{% if edit %}{{edit.sub_category}}{% endif %}"
+                   placeholder="Enter subcategory name (e.g., Electronics, Furniture)" 
+                   required>
+        </div>
+
+        <button type="submit" class="btn-modern {% if edit %}btn-update{% else %}btn-save{% endif %}" id="submitBtn">
+            <i class="fas {% if edit %}fa-sync-alt{% else %}fa-save{% endif %}"></i>
+            <span>{% if edit %}Update SubCategory{% else %}Save SubCategory{% endif %}</span>
+        </button>
+
+        {% if edit %}
+        <a href="{% url 'subcategory_list' %}" class="btn-modern btn-cancel">
+            <i class="fas fa-times"></i>
+            <span>Cancel</span>
+        </a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Table Card -->
+<div class="table-card">
+    <div class="table-header">
+        <h3>
+            <i class="fas fa-list-ul"></i>
+            SubCategory List
+        </h3>
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search subcategories..." onkeyup="searchTable()">
+        </div>
+    </div>
+
+    <!-- Filter Tags -->
+    <div class="filter-badge">
+        <span class="filter-tag active" onclick="filterByCategory('all')">All</span>
+        {% for c in category|slice:":5" %}
+        <span class="filter-tag" onclick="filterByCategory('{{c.id}}')">{{c.name}}</span>
+        {% endfor %}
+        {% if category|length > 5 %}
+        <span class="filter-tag">+{{ category|length|add:"-5" }} more</span>
+        {% endif %}
+    </div>
+
+    {% if data %}
+    <table class="table-modern" id="subcategoryTable">
+        <thead>
+            <tr><th></th>
+                <th>ID</th>
+                <th>Category</th>
+                <th>SubCategory</th>
+                <th>Created</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in data %}
+            <tr >
+               
+                <td>
+                    <span class="id-badge">#{{ i.id|stringformat:"04d" }}</span>
+                </td>
+                <td>
+                    <span class="category-badge">
+                        <i class="fas fa-folder"></i>
+                        {{ i.category.name }}
+                    </span>
+                </td>
+                <td>
+                    <span class="subcategory-name">
+                        <i class="fas fa-angle-right"></i>
+                        {{ i.sub_category }}
+                    </span>
+                </td>
+                <td>
+                    <small style="color: #666;">
+                        <i class="far fa-calendar-alt" style="margin-right: 5px;"></i>
+                        {{ i.created_at|default:"2024-01-15" }}
+                    </small>
+                </td>
+                <td>
+                    <span style="color: #10b981;">
+                        <i class="fas fa-circle" style="font-size: 0.5rem; margin-right: 5px;"></i>
+                        Active
+                    </span>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="{% url 'subcategory_edit' i.id %}" class="btn-action btn-edit" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="#" onclick="viewSubCategory('{{ i.id }}')" class="btn-action btn-view" title="View">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'subcategory_delete' i.id %}" class="btn-action btn-delete" title="Delete" 
+                           onclick="return confirmDelete('{{ i.sub_category }}')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </td>
+                
+           
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-folder-open"></i>
+        <p>No subcategories found. Start by adding your first subcategory!</p>
+        <a href="#" class="btn-add-first" onclick="scrollToForm()">
+            <i class="fas fa-plus-circle"></i>
+            Add First SubCategory
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Progress Bar on Scroll
+    window.onscroll = function() {
+        let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        let scrolled = (winScroll / height) * 100;
+        document.getElementById('progressBar').style.width = scrolled + "%";
+    };
+
+    // Toast Notification System
+    function showToast(message, type = 'success', duration = 3000) {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        
+        let icon = 'check-circle';
+        if (type === 'error') icon = 'exclamation-circle';
+        if (type === 'warning') icon = 'exclamation-triangle';
+        
+        toast.innerHTML = `
+            <i class="fas fa-${icon}"></i>
+            <div class="toast-content">
+                <h6>${type.charAt(0).toUpperCase() + type.slice(1)}</h6>
+                <p>${message}</p>
+            </div>
+            <i class="fas fa-times toast-close" onclick="this.parentElement.remove()"></i>
+        `;
+        
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    }
+
+    // Confirm Delete with animation
+    function confirmDelete(subCategoryName) {
+        return confirm(`⚠️ Are you sure you want to delete "${subCategoryName}"? This will remove all associated data.`);
+    }
+
+    // Search functionality
+    function searchTable() {
+        let input = document.getElementById('searchInput');
+        let filter = input.value.toUpperCase();
+        let table = document.getElementById('subcategoryTable');
+        
+        if (!table) return;
+        
+        let rows = table.getElementsByTagName('tr');
+
+        for (let i = 1; i < rows.length; i++) {
+            let cells = rows[i].getElementsByTagName('td');
+            let found = false;
+            
+            // Search in category and subcategory columns
+            for (let j = 1; j <= 2; j++) {
+                let cell = cells[j];
+                if (cell) {
+                    let textValue = cell.textContent || cell.innerText;
+                    if (textValue.toUpperCase().indexOf(filter) > -1) {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            
+            rows[i].style.display = found ? '' : 'none';
+        }
+    }
+
+    // Filter by category
+    function filterByCategory(categoryId) {
+        let table = document.getElementById('subcategoryTable');
+        if (!table) return;
+        
+        let rows = table.getElementsByTagName('tr');
+        
+        // Update active filter tag
+        document.querySelectorAll('.filter-tag').forEach(tag => {
+            tag.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        
+        for (let i = 1; i < rows.length; i++) {
+            let row = rows[i];
+            let rowCategory = row.getAttribute('data-category-id');
+            
+            if (categoryId === 'all' || rowCategory === categoryId) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        }
+    }
+
+    // View subcategory details
+    function viewSubCategory(id) {
+        showToast(`Viewing details for subcategory #${id}`, 'info');
+        // You can implement modal or redirect to detail page
+    }
+
+    // Scroll to form
+    function scrollToForm() {
+        document.querySelector('.form-card').scrollIntoView({ 
+            behavior: 'smooth' 
+        });
+    }
+
+    // Form validation with animation
+    document.getElementById('subcategoryForm').addEventListener('submit', function(e) {
+        let category = document.querySelector('select[name="category"]').value;
+        let subCategory = document.querySelector('input[name="sub_category"]').value.trim();
+        let submitBtn = document.getElementById('submitBtn');
+        
+        if (!category) {
+            e.preventDefault();
+            showToast('Please select a category', 'error');
+            document.querySelector('select[name="category"]').focus();
+            return;
+        }
+        
+        if (subCategory.length < 2) {
+            e.preventDefault();
+            showToast('Subcategory name must be at least 2 characters long', 'error');
+            document.querySelector('input[name="sub_category"]').focus();
+            return;
+        }
+        
+        if (subCategory.length > 50) {
+            e.preventDefault();
+            showToast('Subcategory name must not exceed 50 characters', 'error');
+            return;
+        }
+        
+        // Show loading state
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        submitBtn.disabled = true;
+        
+        showToast('Subcategory saved successfully!');
+    });
+
+    // Check for URL parameters to show toast
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('saved') === 'true') {
+        showToast('SubCategory saved successfully!');
+    } else if (urlParams.get('deleted') === 'true') {
+        showToast('SubCategory deleted successfully!', 'warning');
+    } else if (urlParams.get('updated') === 'true') {
+        showToast('SubCategory updated successfully!', 'info');
+    }
+
+    // Add animation to table rows on load
+    document.addEventListener('DOMContentLoaded', function() {
+        let rows = document.querySelectorAll('#subcategoryTable tbody tr');
+        rows.forEach((row, index) => {
+            row.style.animation = `slideIn 0.3s ease ${index * 0.1}s forwards`;
+            row.style.opacity = '0';
+        });
+    });
+
+    // Add slide-in animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Real-time character count for input
+    document.querySelector('input[name="sub_category"]').addEventListener('input', function() {
+        let length = this.value.length;
+        let maxLength = 50;
+        let remaining = maxLength - length;
+        
+        if (remaining < 10) {
+            this.style.borderColor = remaining < 0 ? '#dc2626' : '#f59e0b';
+            
+            // Show hint
+            let hint = document.getElementById('charHint');
+            if (!hint) {
+                hint = document.createElement('small');
+                hint.id = 'charHint';
+                hint.style.cssText = 'display: block; margin-top: 5px; color: #f59e0b;';
+                this.parentNode.appendChild(hint);
+            }
+            hint.textContent = remaining >= 0 ? `${remaining} characters remaining` : 'Maximum length exceeded';
+            hint.style.color = remaining < 0 ? '#dc2626' : '#f59e0b';
+        }
+    });
+
+    // Auto-select category when editing
+    {% if edit %}
+    document.querySelector('select[name="category"]').value = "{{ edit.category.id }}";
+    {% endif %}
+</script>
+
+<!-- Add Font Awesome if not already in base.html -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 {% endblock %}

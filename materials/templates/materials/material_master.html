@@ -324,7 +324,7 @@
                 <tr>
                     <td><span class="badge bg-primary">#{{row.id}}</span></td>
                     <td>{{row.category.name}}</td>
-                    <td>{{row.sub_category.name}}</td>
+                    <td>{{row.sub_category.sub_category}}</td>
                     <td>{{row.description}}</td>
                     <td>{{row.quantity}}</td>
                     <td>${{row.rate}}</td>
@@ -363,6 +363,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Category Subcategory AJAX
     document.getElementById("category").addEventListener("change", function() {
         var categoryId = this.value;
+        console.log(categoryId)
         fetch("/materials/load-subcategory/?category=" + categoryId)
         .then(response => response.json())
         .then(data => {

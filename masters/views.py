@@ -200,6 +200,8 @@ def work_spots(request):
         return redirect('/masters/work-spots/')
 
     data = WorkSpots.objects.all()
+    for d in data:
+        d.first_word = d.name.split(" ")[0]
 
     return render(request,'masters/work_spots.html',{
         'data':data

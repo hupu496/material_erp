@@ -1,46 +1,1081 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h2>Unit Master</h2>
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --success-gradient: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        --warning-gradient: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        --danger-gradient: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+        --unit-gradient: linear-gradient(135deg, #34b1aa 0%, #2c7a7b 100%);
+    }
 
-<form method="POST">
-{% csrf_token %}
+    /* Page Header */
+    .page-header {
+        background: linear-gradient(135deg, #34b1aa 0%, #2c7a7b 100%);
+        color: white;
+        padding: 2.5rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(52, 177, 170, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
 
-<input type="text" name="name"
-value="{% if edit %}{{edit.name}}{% endif %}"
-placeholder="Enter Unit">
+    .page-header::before {
+        content: '⚖️';
+        position: absolute;
+        right: 5%;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 8rem;
+        opacity: 0.1;
+        animation: rotate 20s linear infinite;
+    }
 
-<button type="submit">
-{% if edit %}Update{% else %}Save{% endif %}
-</button>
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: -50%;
+        left: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 10s ease-in-out infinite;
+    }
 
-</form>
+    @keyframes rotate {
+        from { transform: translateY(-50%) rotate(0deg); }
+        to { transform: translateY(-50%) rotate(360deg); }
+    }
 
-<hr>
+    @keyframes float {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        50% { transform: translate(-30px, 30px) rotate(180deg); }
+    }
 
-<table border="1">
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+    }
 
-<tr>
-<th>ID</th>
-<th>Unit</th>
-<th>Action</th>
-</tr>
+    .header-title h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
 
-{% for i in data %}
+    .header-title p {
+        margin: 0.5rem 0 0;
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
 
-<tr>
-<td>{{i.id}}</td>
-<td>{{i.name}}</td>
-<td>
+    .header-stats {
+        display: flex;
+        gap: 2rem;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
 
-<a href="{% url 'unit_edit' i.id %}">Edit</a> |
-<a href="{% url 'unit_delete' i.id %}">Delete</a>
+    .stat-item {
+        text-align: center;
+    }
 
-</td>
-</tr>
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1;
+    }
 
-{% endfor %}
+    .stat-label {
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
 
-</table>
+    /* Form Card */
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        border: 1px solid rgba(52, 177, 170, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .form-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(52, 177, 170, 0.15);
+    }
+
+    .form-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e0f2f1;
+    }
+
+    .form-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #34b1aa 0%, #2c7a7b 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    .form-title h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2c7a7b;
+        margin: 0;
+    }
+
+    .form-badge {
+        margin-left: auto;
+        background: linear-gradient(135deg, #34b1aa 0%, #2c7a7b 100%);
+        color: white;
+        padding: 0.3rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+    }
+
+    /* Unit Input Group */
+    .unit-input-group {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .unit-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #34b1aa;
+        font-size: 1.2rem;
+        z-index: 10;
+    }
+
+    .unit-input {
+        width: 100%;
+        padding: 1rem 1rem 1rem 45px;
+        border: 2px solid #e0f2f1;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .unit-input:focus {
+        border-color: #34b1aa;
+        box-shadow: 0 0 0 4px rgba(52, 177, 170, 0.1);
+        outline: none;
+    }
+
+    .unit-input::placeholder {
+        color: #80cbc4;
+        font-weight: 300;
+    }
+
+    /* Common Units Quick Select */
+    .common-units {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .unit-tag {
+        background: #e0f2f1;
+        color: #2c7a7b;
+        padding: 0.5rem 1rem;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .unit-tag:hover {
+        background: linear-gradient(135deg, #34b1aa 0%, #2c7a7b 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(52, 177, 170, 0.3);
+    }
+
+    .unit-tag i {
+        margin-right: 5px;
+        font-size: 0.8rem;
+    }
+
+    /* Button */
+    .btn-unit {
+        background: linear-gradient(135deg, #34b1aa 0%, #2c7a7b 100%);
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(52, 177, 170, 0.3);
+    }
+
+    .btn-unit::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-unit:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-unit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(52, 177, 170, 0.4);
+    }
+
+    .btn-unit i {
+        position: relative;
+        z-index: 1;
+    }
+
+    .btn-cancel {
+        background: #6c757d;
+        box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+        margin-left: 1rem;
+    }
+
+    /* Table Card */
+    .table-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .table-header h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2c7a7b;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .table-header h3 i {
+        color: #34b1aa;
+    }
+
+    /* Search Box */
+    .search-box {
+        position: relative;
+    }
+
+    .search-box input {
+        padding: 0.7rem 1rem 0.7rem 2.5rem;
+        border: 2px solid #e0f2f1;
+        border-radius: 30px;
+        width: 300px;
+        transition: all 0.3s ease;
+    }
+
+    .search-box input:focus {
+        border-color: #34b1aa;
+        box-shadow: 0 0 0 4px rgba(52, 177, 170, 0.1);
+        outline: none;
+        width: 350px;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #80cbc4;
+    }
+
+    /* Unit Type Filter */
+    .unit-filters {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-pill {
+        background: #f8f9fa;
+        color: #666;
+        padding: 0.5rem 1.2rem;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .filter-pill:hover {
+        background: #e0f2f1;
+        color: #2c7a7b;
+    }
+
+    .filter-pill.active {
+        background: linear-gradient(135deg, #34b1aa 0%, #2c7a7b 100%);
+        color: white;
+    }
+
+    /* Table */
+    .unit-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+
+    .unit-table thead th {
+        background: linear-gradient(135deg, #34b1aa 0%, #2c7a7b 100%);
+        color: white;
+        padding: 1rem;
+        font-weight: 600;
+        border: none;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .unit-table thead th:first-child {
+        border-radius: 10px 0 0 10px;
+    }
+
+    .unit-table thead th:last-child {
+        border-radius: 0 10px 10px 0;
+    }
+
+    .unit-table tbody tr {
+        background: white;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(52, 177, 170, 0.05);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .unit-table tbody tr::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: linear-gradient(135deg, #34b1aa 0%, #2c7a7b 100%);
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .unit-table tbody tr:hover::before {
+        transform: scaleY(1);
+    }
+
+    .unit-table tbody tr:hover {
+        transform: translateX(5px) translateY(-3px);
+        box-shadow: 0 10px 20px rgba(52, 177, 170, 0.15);
+    }
+
+    .unit-table tbody td {
+        padding: 1.2rem 1rem;
+        border: none;
+        color: #555;
+    }
+
+    .unit-table tbody td:first-child {
+        border-radius: 10px 0 0 10px;
+    }
+
+    .unit-table tbody td:last-child {
+        border-radius: 0 10px 10px 0;
+    }
+
+    /* ID Badge */
+    .unit-id {
+        background: linear-gradient(135deg, #34b1aa 0%, #2c7a7b 100%);
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+        box-shadow: 0 2px 5px rgba(52, 177, 170, 0.3);
+    }
+
+    /* Unit Name Display */
+    .unit-display {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .unit-icon-small {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #2c7a7b;
+        font-size: 1.2rem;
+    }
+
+    .unit-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .unit-name {
+        font-weight: 600;
+        color: #2c7a7b;
+    }
+
+    .unit-symbol {
+        font-size: 0.8rem;
+        color: #80cbc4;
+    }
+
+    /* Unit Type Indicator */
+    .unit-type {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 0.3rem 0.8rem;
+        background: #f0f9f8;
+        border-radius: 20px;
+        color: #2c7a7b;
+        font-size: 0.8rem;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .btn-action {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-action::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-action:hover::before {
+        width: 100px;
+        height: 100px;
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        box-shadow: 0 3px 10px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+        box-shadow: 0 3px 10px rgba(220, 38, 38, 0.3);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background: linear-gradient(135deg, #f0f9f8 0%, #e0f2f1 100%);
+        border-radius: 15px;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        background: linear-gradient(135deg, #34b1aa 0%, #2c7a7b 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1rem;
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .empty-state p {
+        color: #2c7a7b;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-add-unit {
+        background: linear-gradient(135deg, #34b1aa 0%, #2c7a7b 100%);
+        color: white;
+        padding: 0.8rem 2rem;
+        border-radius: 30px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-add-unit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(52, 177, 170, 0.3);
+        color: white;
+    }
+
+    /* Toast Notification */
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+    }
+
+    .toast {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 10px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transform: translateX(400px);
+        transition: transform 0.3s ease;
+        border-left: 4px solid #34b1aa;
+    }
+
+    .toast.show {
+        transform: translateX(0);
+    }
+
+    .toast i {
+        font-size: 1.5rem;
+        color: #34b1aa;
+    }
+
+    .toast-content h6 {
+        margin: 0;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .toast-content p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .toast-close {
+        cursor: pointer;
+        color: #999;
+        transition: color 0.3s ease;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .header-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .header-stats {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .table-header {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .search-box input {
+            width: 100%;
+        }
+
+        .search-box input:focus {
+            width: 100%;
+        }
+
+        .unit-table {
+            display: block;
+            overflow-x: auto;
+        }
+
+        .btn-cancel {
+            margin-left: 0;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .common-units {
+            justify-content: center;
+        }
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="header-content">
+        <div class="header-title">
+            <h2>
+                <i class="fas fa-balance-scale"></i>
+                Unit Master
+            </h2>
+            <p>Manage measurement units for your inventory</p>
+        </div>
+        <div class="header-stats">
+            <div class="stat-item">
+                <div class="stat-value">{{ data|length }}</div>
+                <div class="stat-label">Total Units</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{% if edit %}1{% else %}0{% endif %}</div>
+                <div class="stat-label">Editing</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Form Card -->
+<div class="form-card">
+    <div class="form-title">
+        <div class="form-icon">
+            <i class="fas {% if edit %}fa-edit{% else %}fa-plus{% endif %}"></i>
+        </div>
+        <h3>{% if edit %}Edit Unit{% else %}Add New Unit{% endif %}</h3>
+        <span class="form-badge">{% if edit %}Update Mode{% else %}Create Mode{% endif %}</span>
+    </div>
+
+    <!-- Common Units Quick Select (Visual Only - Doesn't Affect Backend) -->
+    <div class="common-units">
+        <span class="unit-tag" onclick="setUnitValue('Kilogram (kg)')">
+            <i class="fas fa-weight-hanging"></i> kg
+        </span>
+        <span class="unit-tag" onclick="setUnitValue('Gram (g)')">
+            <i class="fas fa-weight-hanging"></i> g
+        </span>
+        <span class="unit-tag" onclick="setUnitValue('Liter (L)')">
+            <i class="fas fa-flask"></i> L
+        </span>
+        <span class="unit-tag" onclick="setUnitValue('Milliliter (ml)')">
+            <i class="fas fa-flask"></i> ml
+        </span>
+        <span class="unit-tag" onclick="setUnitValue('Piece (pc)')">
+            <i class="fas fa-cube"></i> pc
+        </span>
+        <span class="unit-tag" onclick="setUnitValue('Box (bx)')">
+            <i class="fas fa-box"></i> bx
+        </span>
+        <span class="unit-tag" onclick="setUnitValue('Meter (m)')">
+            <i class="fas fa-ruler"></i> m
+        </span>
+        <span class="unit-tag" onclick="setUnitValue('Dozen (dz)')">
+            <i class="fas fa-cubes"></i> dz
+        </span>
+    </div>
+
+    <form method="POST" id="unitForm">
+        {% csrf_token %}
+        
+        <div class="unit-input-group">
+            <i class="fas fa-ruler unit-icon"></i>
+            <input type="text" name="name" class="unit-input" 
+                   value="{% if edit %}{{edit.name}}{% endif %}"
+                   placeholder="Enter unit name (e.g., Kilogram, Liter, Piece)" 
+                   id="unitInput" required>
+        </div>
+
+        <button type="submit" class="btn-unit" id="submitBtn">
+            <i class="fas {% if edit %}fa-sync-alt{% else %}fa-save{% endif %}"></i>
+            <span>{% if edit %}Update Unit{% else %}Save Unit{% endif %}</span>
+        </button>
+
+        {% if edit %}
+        <a href="{% url 'unit_master' %}" class="btn-unit btn-cancel">
+            <i class="fas fa-times"></i>
+            <span>Cancel</span>
+        </a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Table Card -->
+<div class="table-card">
+    <div class="table-header">
+        <h3>
+            <i class="fas fa-list-ul"></i>
+            Unit List
+        </h3>
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search units..." onkeyup="searchTable()">
+        </div>
+    </div>
+
+    <!-- Unit Type Filters (Visual Only) -->
+    <div class="unit-filters">
+        <span class="filter-pill active" onclick="filterUnits('all')">All Units</span>
+        <span class="filter-pill" onclick="filterUnits('weight')">Weight</span>
+        <span class="filter-pill" onclick="filterUnits('volume')">Volume</span>
+        <span class="filter-pill" onclick="filterUnits('length')">Length</span>
+        <span class="filter-pill" onclick="filterUnits('quantity')">Quantity</span>
+        <span class="filter-pill" onclick="filterUnits('packaging')">Packaging</span>
+    </div>
+
+    {% if data %}
+    <table class="unit-table" id="unitTable">
+        <thead>
+            <tr><th></th>
+                <th>ID</th>
+                <th>Unit</th>
+                <th>Symbol</th>
+                <th>Type</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in data %}
+            <tr>
+                <td>
+                    <span class="unit-id">#{{ i.id|stringformat:"04d" }}</span>
+                </td>
+                <td>
+                    <div class="unit-display">
+                        <div class="unit-icon-small">
+                            {% with first_char=i.name|first|lower %}
+                                {% if 'k' in first_char or 'g' in first_char %}
+                                    <i class="fas fa-weight-hanging"></i>
+                                {% elif 'l' in first_char or 'm' in first_char and 'ml' not in i.name|lower %}
+                                    <i class="fas fa-flask"></i>
+                                {% elif 'p' in first_char %}
+                                    <i class="fas fa-cube"></i>
+                                {% elif 'b' in first_char %}
+                                    <i class="fas fa-box"></i>
+                                {% elif 'm' in first_char %}
+                                    <i class="fas fa-ruler"></i>
+                                {% else %}
+                                    <i class="fas fa-balance-scale"></i>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                        <div class="unit-info">
+                            <span class="unit-name">{{ i.name }}</span>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    {% with name_parts=i.name|lower %}
+                        {% if 'kilogram' in name_parts or 'kg' in name_parts %}
+                            <span class="unit-type">kg</span>
+                        {% elif 'gram' in name_parts or 'g' in name_parts %}
+                            <span class="unit-type">g</span>
+                        {% elif 'liter' in name_parts or 'l' in name_parts %}
+                            <span class="unit-type">L</span>
+                        {% elif 'milliliter' in name_parts or 'ml' in name_parts %}
+                            <span class="unit-type">ml</span>
+                        {% elif 'piece' in name_parts or 'pc' in name_parts %}
+                            <span class="unit-type">pc</span>
+                        {% elif 'box' in name_parts or 'bx' in name_parts %}
+                            <span class="unit-type">bx</span>
+                        {% elif 'meter' in name_parts or 'm' in name_parts %}
+                            <span class="unit-type">m</span>
+                        {% elif 'dozen' in name_parts or 'dz' in name_parts %}
+                            <span class="unit-type">dz</span>
+                        {% else %}
+                            <span class="unit-type">{{ i.name|slice:":3"|lower }}</span>
+                        {% endif %}
+                    {% endwith %}
+                </td>
+                <td>
+                    {% with name_lower=i.name|lower %}
+                        {% if 'kg' in name_lower or 'gram' in name_lower or 'weight' in name_lower %}
+                            <span class="unit-type"><i class="fas fa-weight-hanging"></i> Weight</span>
+                        {% elif 'liter' in name_lower or 'ml' in name_lower or 'volume' in name_lower %}
+                            <span class="unit-type"><i class="fas fa-flask"></i> Volume</span>
+                        {% elif 'meter' in name_lower or 'cm' in name_lower or 'length' in name_lower %}
+                            <span class="unit-type"><i class="fas fa-ruler"></i> Length</span>
+                        {% elif 'piece' in name_lower or 'pc' in name_lower or 'unit' in name_lower %}
+                            <span class="unit-type"><i class="fas fa-cube"></i> Quantity</span>
+                        {% elif 'box' in name_lower or 'pack' in name_lower %}
+                            <span class="unit-type"><i class="fas fa-box"></i> Packaging</span>
+                        {% else %}
+                            <span class="unit-type"><i class="fas fa-balance-scale"></i> Other</span>
+                        {% endif %}
+                    {% endwith %}
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="{% url 'unit_edit' i.id %}" class="btn-action btn-edit" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'unit_delete' i.id %}" class="btn-action btn-delete" title="Delete" 
+                           onclick="return confirmDelete('{{ i.name }}')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-balance-scale"></i>
+        <p>No units found. Start by adding your first unit!</p>
+        <button class="btn-add-unit" onclick="scrollToForm()">
+            <i class="fas fa-plus-circle"></i>
+            Add First Unit
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Toast Notification System
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        
+        toast.innerHTML = `
+            <i class="fas fa-check-circle"></i>
+            <div class="toast-content">
+                <h6>Success</h6>
+                <p>${message}</p>
+            </div>
+            <i class="fas fa-times toast-close" onclick="this.parentElement.remove()"></i>
+        `;
+        
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    // Set unit value from quick select (Visual Only - Doesn't affect backend)
+    function setUnitValue(value) {
+        document.getElementById('unitInput').value = value;
+        document.getElementById('unitInput').focus();
+        showToast(`Quick select: ${value}`, 'info');
+    }
+
+    // Confirm Delete
+    function confirmDelete(unitName) {
+        return confirm(`⚠️ Are you sure you want to delete "${unitName}"? This action cannot be undone.`);
+    }
+
+    // Search functionality
+    function searchTable() {
+        let input = document.getElementById('searchInput');
+        let filter = input.value.toUpperCase();
+        let table = document.getElementById('unitTable');
+        
+        if (!table) return;
+        
+        let rows = table.getElementsByTagName('tr');
+
+        for (let i = 1; i < rows.length; i++) {
+            let cells = rows[i].getElementsByTagName('td');
+            let found = false;
+            
+            // Search in unit name column
+            let unitCell = cells[1];
+            if (unitCell) {
+                let textValue = unitCell.textContent || unitCell.innerText;
+                if (textValue.toUpperCase().indexOf(filter) > -1) {
+                    found = true;
+                }
+            }
+            
+            rows[i].style.display = found ? '' : 'none';
+        }
+    }
+
+    // Filter units (Visual Only)
+    function filterUnits(type) {
+        // Update active filter
+        document.querySelectorAll('.filter-pill').forEach(pill => {
+            pill.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        
+        // Show visual feedback
+        showToast(`Filtering by: ${type} units`, 'info');
+    }
+
+    // Scroll to form
+    function scrollToForm() {
+        document.querySelector('.form-card').scrollIntoView({ 
+            behavior: 'smooth' 
+        });
+    }
+
+    // Form validation
+    document.getElementById('unitForm').addEventListener('submit', function(e) {
+        let unitName = document.querySelector('input[name="name"]').value.trim();
+        let submitBtn = document.getElementById('submitBtn');
+        
+        if (unitName.length < 2) {
+            e.preventDefault();
+            showToast('Unit name must be at least 2 characters long', 'error');
+            document.querySelector('input[name="name"]').focus();
+            return;
+        }
+        
+        if (unitName.length > 50) {
+            e.preventDefault();
+            showToast('Unit name must not exceed 50 characters', 'error');
+            return;
+        }
+        
+        // Show loading state
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        submitBtn.disabled = true;
+    });
+
+    // Check for URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('saved') === 'true') {
+        showToast('Unit saved successfully!');
+    } else if (urlParams.get('deleted') === 'true') {
+        showToast('Unit deleted successfully!');
+    } else if (urlParams.get('updated') === 'true') {
+        showToast('Unit updated successfully!');
+    }
+
+    // Add animation to table rows
+    document.addEventListener('DOMContentLoaded', function() {
+        let rows = document.querySelectorAll('#unitTable tbody tr');
+        rows.forEach((row, index) => {
+            row.style.animation = `slideIn 0.3s ease ${index * 0.1}s forwards`;
+            row.style.opacity = '0';
+        });
+    });
+
+    // Add slide-in animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Real-time character count
+    document.querySelector('input[name="name"]').addEventListener('input', function() {
+        let length = this.value.length;
+        let maxLength = 50;
+        let remaining = maxLength - length;
+        
+        if (remaining < 10) {
+            this.style.borderColor = remaining < 0 ? '#dc2626' : '#f59e0b';
+            
+            let hint = document.getElementById('charHint');
+            if (!hint) {
+                hint = document.createElement('small');
+                hint.id = 'charHint';
+                hint.style.cssText = 'display: block; margin-top: 5px; font-size: 0.8rem;';
+                this.parentNode.appendChild(hint);
+            }
+            hint.textContent = remaining >= 0 ? `${remaining} characters remaining` : 'Maximum length exceeded';
+            hint.style.color = remaining < 0 ? '#dc2626' : '#f59e0b';
+        }
+    });
+</script>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 {% endblock %}

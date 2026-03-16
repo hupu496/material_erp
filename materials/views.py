@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-
+from django.http import JsonResponse
 from masters.models import Category, SubCategory, WorkSpots, UnitMaster
 from .models import MaterialMaster
 
@@ -7,7 +7,7 @@ from .models import MaterialMaster
 def material_master(request):
 
     if request.method == "POST":
-
+       
         MaterialMaster.objects.create(
             category_id=request.POST.get('category'),
             sub_category_id=request.POST.get('subcategory'),
@@ -33,7 +33,7 @@ def material_master(request):
     data = MaterialMaster.objects.select_related(
         'category','sub_category','work_spots','units'
     ).all()
-   
+    print(data)
     return render(request, 'materials/material_master.html', {
         'category': category,
         'subcategory': subcategory,
@@ -43,9 +43,12 @@ def material_master(request):
     })
 
 def load_subcategory(request):
+
     category_id = request.GET.get('category')
 
-    subcategory = SubCategory.objects.filter(category_id=category_id).values('id','sub_category')
+    subcategory = SubCategory.objects.filter(
+        category_id=category_id
+    ).values('id','sub_category')
 
     return JsonResponse(list(subcategory), safe=False)
 def material_receipt(request):
