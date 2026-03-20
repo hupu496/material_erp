@@ -2,11 +2,19 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from masters.models import Category, SubCategory, WorkSpots, UnitMaster
 from .models import MaterialMaster
-
+import base64
+from django.core.files.base import ContentFile
 
 def material_master(request):
 
     if request.method == "POST":
+        photo = request.FILES.get('photo')
+        captured_photo = request.POST.get('captured_photo')
+
+        if not photo and captured_photo:
+            format, imgstr = captured_photo.split(';base64,') 
+            ext = format.split('/')[-1]
+            photo = ContentFile(base64.b64decode(imgstr), name='captured.' + ext)
        
         MaterialMaster.objects.create(
             category_id=request.POST.get('category'),
@@ -19,7 +27,7 @@ def material_master(request):
             rackno=request.POST.get('rackno'),
             qty=request.POST.get('qty'),
             critical_qty=request.POST.get('critical_qty'),
-            photo=request.FILES.get('photo')
+            photo=photo
         )
 
         return redirect('material_master')
@@ -33,7 +41,6 @@ def material_master(request):
     data = MaterialMaster.objects.select_related(
         'category','sub_category','work_spots','units'
     ).all()
-    print(data)
     return render(request, 'materials/material_master.html', {
         'category': category,
         'subcategory': subcategory,
