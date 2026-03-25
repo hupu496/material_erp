@@ -1,0 +1,759 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_title %}Material Receipt{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ==================== PREMIUM VARIABLES ==================== */
+    :root {
+        --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        --shadow-xl: 0 25px 35px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* ==================== FORM CARD ==================== */
+    .form-card {
+        background: white;
+        border-radius: 24px;
+        padding: 2rem;
+        box-shadow: var(--shadow-lg);
+        transition: all 0.3s ease;
+        animation: scaleIn 0.5s ease-out;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .form-card:hover {
+        box-shadow: var(--shadow-xl);
+        transform: translateY(-2px);
+    }
+
+    /* ==================== FORM CONTROLS ==================== */
+    .form-control-modern {
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+        width: 100%;
+        font-size: 0.95rem;
+        background: white;
+    }
+
+    .form-control-modern:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+
+    .form-control-modern:hover:not(:focus) {
+        border-color: #764ba2;
+    }
+
+    /* Floating Label */
+    .floating-label {
+        position: relative;
+        margin-bottom: 1.8rem;
+    }
+
+    .floating-label input,
+    .floating-label select,
+    .floating-label textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .floating-label textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .floating-label label {
+        position: absolute;
+        top: -12px;
+        left: 16px;
+        background: white;
+        padding: 0 8px;
+        font-size: 0.8rem;
+        color: #667eea;
+        font-weight: 600;
+        z-index: 1;
+        transition: all 0.3s ease;
+        border-radius: 20px;
+    }
+
+    /* Select styling */
+    select.form-control-modern {
+        appearance: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23667eea' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        background-size: 16px;
+        padding-right: 40px;
+    }
+
+    /* Date input styling */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 8px;
+        padding: 4px;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.3s;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator:hover {
+        opacity: 1;
+    }
+
+    /* ==================== BUTTONS ==================== */
+    .btn-save {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 32px;
+        border-radius: 40px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #718096, #4a5568);
+        color: white;
+        border: none;
+        padding: 12px 28px;
+        border-radius: 40px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-reset {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        color: #92400e;
+        border: none;
+        padding: 12px 28px;
+        border-radius: 40px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-reset:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    /* ==================== FORM HINT ==================== */
+    .form-hint {
+        font-size: 0.7rem;
+        margin-top: 0.5rem;
+        margin-left: 1rem;
+        color: #718096;
+        font-weight: 500;
+    }
+
+    .form-hint i {
+        margin-right: 4px;
+        color: #667eea;
+    }
+
+    /* ==================== NOTIFICATION TOAST ==================== */
+    .notification-toast {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 50px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        z-index: 1000;
+        animation: slideInRight 0.3s ease-out;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .notification-toast.error {
+        background: linear-gradient(135deg, #fc8181, #f56565);
+    }
+
+    .notification-toast.success {
+        background: linear-gradient(135deg, #48bb78, #38a169);
+    }
+
+    /* ==================== FORM VALIDATION ==================== */
+    .form-control-modern.error {
+        border-color: #fc8181;
+        animation: shake 0.5s ease;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    /* ==================== LOADING STATE ==================== */
+    .btn-save.loading {
+        position: relative;
+        pointer-events: none;
+        opacity: 0.8;
+    }
+
+    .btn-save.loading::after {
+        content: '';
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        top: 50%;
+        right: 20px;
+        margin-top: -9px;
+        border: 2px solid white;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+    }
+
+    /* ==================== TOOLTIP ==================== */
+    [data-tooltip] {
+        position: relative;
+        cursor: help;
+    }
+
+    [data-tooltip]:before {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 6px 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+        z-index: 10;
+        margin-bottom: 8px;
+    }
+
+    [data-tooltip]:hover:before {
+        opacity: 1;
+    }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 768px) {
+        .form-card {
+            padding: 1.5rem;
+        }
+
+        .btn-save, .btn-secondary, .btn-reset {
+            width: 100%;
+            justify-content: center;
+            margin: 5px 0;
+        }
+
+        .d-flex.gap-3 {
+            flex-direction: column;
+            gap: 10px !important;
+        }
+    }
+
+    /* ==================== GRID ANIMATIONS ==================== */
+    .row > [class*="col-"] {
+        animation: slideInUp 0.4s ease-out backwards;
+    }
+
+    .row > [class*="col-"]:nth-child(1) { animation-delay: 0.05s; }
+    .row > [class*="col-"]:nth-child(2) { animation-delay: 0.1s; }
+    .row > [class*="col-"]:nth-child(3) { animation-delay: 0.15s; }
+    .row > [class*="col-"]:nth-child(4) { animation-delay: 0.2s; }
+    .row > [class*="col-"]:nth-child(5) { animation-delay: 0.25s; }
+    .row > [class*="col-"]:nth-child(6) { animation-delay: 0.3s; }
+    .row > [class*="col-"]:nth-child(7) { animation-delay: 0.35s; }
+    .row > [class*="col-"]:nth-child(8) { animation-delay: 0.4s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <form method="POST" id="receiptForm" novalidate>
+        {% csrf_token %}
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row g-4">
+
+                    <!-- Issue Date -->
+                    <div class="col-md-6">
+                        <div class="floating-label">
+                            <label><i class="far fa-calendar-alt me-1"></i> Issue Date <span class="text-danger">*</span></label>
+                            <input name="issue_date" type="date" class="form-control-modern"
+                                   value="{% if instance %}{{ instance.issue_date|date:'Y-m-d' }}{% else %}{{ today|date:'Y-m-d' }}{% endif %}" 
+                                   required>
+                        </div>
+                    </div>
+
+                    <!-- Entry No -->
+                    <div class="col-md-6">
+                        <div class="floating-label">
+                            <label><i class="fas fa-hashtag me-1"></i> Entry No <span class="text-danger">*</span></label>
+                            <input name="entry_no" type="number" class="form-control-modern"
+                                   value="{% if instance %}{{ instance.entry_no }}{% endif %}" required>
+                        </div>
+                    </div>
+
+                    <!-- Challan No -->
+                    <div class="col-md-6">
+                        <div class="floating-label">
+                            <label><i class="fas fa-file-invoice me-1"></i> Challan No</label>
+                            <input name="challan_no" class="form-control-modern"
+                                   value="{% if instance %}{{ instance.challan_no }}{% endif %}">
+                        </div>
+                    </div>
+
+                    <!-- Category, Sub Category, Item (same as before) -->
+                    <div class="col-md-6">
+                        <div class="floating-label">
+                            <label><i class="fas fa-layer-group me-1"></i> Category <span class="text-danger">*</span></label>
+                            <select id="category" name="category" class="form-control-modern" required>
+                                <option value="">-- Select Category --</option>
+                                {% for c in categories %}
+                                <option value="{{c.id}}" {% if instance and instance.category_id == c.id %}selected{% endif %}>
+                                    {{c.name}}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="floating-label">
+                            <label><i class="fas fa-code-branch me-1"></i> Sub Category <span class="text-danger">*</span></label>
+                            <select id="subcategory" name="subcategory" class="form-control-modern" required>
+                                <option value="">-- Select SubCategory --</option>
+                                {% for sc in subcategories %}
+                                <option value="{{sc.id}}" {% if instance and instance.sub_category_id == sc.id %}selected{% endif %}>
+                                    {{sc.sub_category}}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Item Selection - This is the key part -->
+                    <div class="col-md-12">
+                        <div class="floating-label">
+                            <label><i class="fas fa-boxes me-1"></i> Item (From Material Master) <span class="text-danger">*</span></label>
+                            <select name="item" id="item" class="form-control-modern" required>
+                                <option value="">-- Select Item from Master --</option>
+                                {% for m in materials %}
+                                <option value="{{m.id}}" 
+                                        data-rate="{{ m.rate|default:0 }}"
+                                        data-rackno="{{ m.rackno|default:'' }}"
+                                        {% if instance and instance.item_id == m.id %}selected{% endif %}>
+                                    {{ m.description }} - {{ m.category.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Total Nos -->
+                    <div class="col-md-4">
+                        <div class="floating-label">
+                            <label><i class="fas fa-cubes me-1"></i> Total Nos <span class="text-danger">*</span></label>
+                            <input name="totalno" id="totalno" type="number" class="form-control-modern"
+                                   value="{% if instance %}{{ instance.totalno }}{% endif %}" required>
+                        </div>
+                    </div>
+
+                    <!-- Rate (Auto-filled from Material Master) -->
+                    <div class="col-md-4">
+                        <div class="floating-label">
+                            <label><i class="fas fa-rupee-sign me-1"></i> Rate</label>
+                            <input name="rate" id="rate" type="number" step="0.01" class="form-control-modern"
+                                   value="{% if instance %}{{ instance.rate }}{% endif %}" readonly>
+                        </div>
+                    </div>
+
+                    <!-- Rack No (Auto-filled from Material Master) -->
+                    <div class="col-md-4">
+                        <div class="floating-label">
+                            <label><i class="fas fa-archive me-1"></i> Rack No</label>
+                            <input name="rackno" id="rackno" class="form-control-modern"
+                                   value="{% if instance %}{{ instance.rackno }}{% endif %}" readonly>
+                        </div>
+                    </div>
+
+                    <!-- Total Stock (Auto-calculated: Total Nos × Rate) -->
+                    <div class="col-md-6">
+                        <div class="floating-label">
+                            <label><i class="fas fa-chart-line me-1"></i> Total Stock</label>
+                            <input name="total_stock" id="total_stock" type="number" step="0.01" 
+                                   class="form-control-modern" readonly placeholder="Auto Calculated">
+                        </div>
+                    </div>
+
+                    <!-- Remaining fields -->
+                    <div class="col-md-6">
+                        <div class="floating-label">
+                            <label><i class="fas fa-truck me-1"></i> Received From <span class="text-danger">*</span></label>
+                            <input name="receive_from" class="form-control-modern"
+                                   value="{% if instance %}{{ instance.receive_from }}{% endif %}" required>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="floating-label">
+                            <label><i class="fas fa-truck-moving me-1"></i> Vehicle No</label>
+                            <input name="vehicle_no" class="form-control-modern"
+                                   value="{% if instance %}{{ instance.vehicle_no }}{% endif %}">
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="floating-label">
+                            <label><i class="fas fa-user-check me-1"></i> Receiver</label>
+                            <input name="receiver" class="form-control-modern"
+                                   value="{% if instance %}{{ instance.receiver }}{% endif %}">
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="floating-label">
+                            <label><i class="fas fa-pen-alt me-1"></i> Remarks</label>
+                            <textarea name="remarks" rows="3" class="form-control-modern">{% if instance %}{{ instance.remarks }}{% endif %}</textarea>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="text-center mt-4 pt-3 d-flex flex-wrap justify-content-center gap-3">
+            <button type="submit" class="btn-save" id="submitBtn">
+                <i class="fas fa-save"></i> 
+                {% if is_edit %}Update Receipt{% else %}Save Receipt{% endif %}
+            </button>
+            {% if is_edit %}
+            <a href="{% url 'material_receipt' %}" class="btn-secondary">
+                <i class="fas fa-times-circle me-1"></i> Cancel
+            </a>
+            {% else %}
+            <button type="button" class="btn-reset" onclick="resetForm()">
+                <i class="fas fa-undo-alt me-1"></i> Reset Form
+            </button>
+            {% endif %}
+        </div>
+    </form>
+</div>
+<!-- Receipt List -->
+<div class="mt-5">
+    <h3 class="mb-3 text-primary">
+        <i class="fas fa-list"></i> All Material Receipts
+    </h3>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-modern">
+            <thead class="table-dark">
+                <tr>
+                    <th>Date</th>
+                    <th>Entry No</th>
+                    <th>Challan No</th>
+                    <th>Item</th>
+                    <th>Total Nos</th>
+                    <th>Rate</th>
+                    <th>Total Stock</th>
+                    <th>Received From</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for receipt in receipts %}
+                <tr>
+                    <td>{{ receipt.issue_date|date:'d-m-Y' }}</td>
+                    <td><strong>#{{ receipt.entry_no }}</strong></td>
+                    <td>{{ receipt.challan_no|default:'-' }}</td>
+                    <td>
+                        {{ receipt.item.description }}<br>
+                        <small class="text-muted">{{ receipt.category.name }} - {{ receipt.sub_category.sub_category }}</small>
+                    </td>
+                    <td>{{ receipt.totalno }}</td>
+                    <td>₹{{ receipt.rate|floatformat:2 }}</td>
+                    <td><strong>₹{{ receipt.total_stock|floatformat:2 }}</strong></td>
+                    <td>{{ receipt.receive_from }}</td>
+                    <td>
+                        <!-- Edit Button -->
+                        <a href="{% url 'material_receipt' receipt.pk %}" 
+                           class="btn btn-sm btn-warning me-2">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        
+                        <!-- Delete Button -->
+                        <form method="post" 
+                              action="{% url 'material_receipt_delete' receipt.pk %}" 
+                              style="display:inline;"
+                              onsubmit="return confirm('Are you sure you want to delete this receipt?')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center py-4">
+                        <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                        <h5>No receipts found</h5>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('receiptForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const categorySelect = document.getElementById('category');
+    const subcategorySelect = document.getElementById('subcategory');
+    
+    // Category → Subcategory AJAX
+    if (categorySelect) {
+        categorySelect.addEventListener('change', function() {
+            const categoryId = this.value;
+            
+            if (!categoryId) {
+                subcategorySelect.innerHTML = '<option value="">-- Select SubCategory --</option>';
+                return;
+            }
+            
+            subcategorySelect.innerHTML = '<option value="">Loading...</option>';
+            subcategorySelect.disabled = true;
+            
+            fetch("/materials/load-subcategory/?category=" + categoryId)
+                .then(response => response.json())
+                .then(data => {
+                    subcategorySelect.innerHTML = '<option value="">-- Select SubCategory --</option>';
+                    data.forEach(function(item) {
+                        subcategorySelect.innerHTML += `<option value="${item.id}">${escapeHtml(item.sub_category)}</option>`;
+                    });
+                    subcategorySelect.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    subcategorySelect.innerHTML = '<option value="">Error loading subcategories</option>';
+                    subcategorySelect.disabled = false;
+                    showNotification('Failed to load subcategories', 'error');
+                });
+        });
+    }
+    
+    // Form Validation
+    function validateForm() {
+        let isValid = true;
+        const requiredFields = form.querySelectorAll('[required]');
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('error');
+                setTimeout(() => field.classList.remove('error'), 500);
+            } else {
+                field.classList.remove('error');
+            }
+        });
+        
+        return isValid;
+    }
+    
+    // Notification System
+    function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification-toast ${type}`;
+        notification.innerHTML = `
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2"></i>
+            <span>${escapeHtml(message)}</span>
+        `;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    // Form Submit Handler
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (!validateForm()) {
+                e.preventDefault();
+                showNotification('Please fill all required fields marked with *', 'error');
+                return;
+            }
+            
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+        });
+    }
+    
+    // Real-time validation
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.classList.remove('error');
+            }
+        });
+        
+        input.addEventListener('blur', function() {
+            if (this.hasAttribute('required') && !this.value.trim()) {
+                this.classList.add('error');
+            } else {
+                this.classList.remove('error');
+            }
+        });
+    });
+    
+    // ==================== NEW LOGIC: Item Selection ====================
+    const itemSelect = document.getElementById('item');
+    const rateInput = document.getElementById('rate');
+    const racknoInput = document.getElementById('rackno');
+    const totalnoInput = document.getElementById('totalno');
+    const totalStockInput = document.getElementById('total_stock');
+
+    // When Item is selected → Auto fill Rate and Rack No
+    if (itemSelect) {
+        itemSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            
+            if (selectedOption.value) {
+                const rate = selectedOption.getAttribute('data-rate') || 0;
+                const rackno = selectedOption.getAttribute('data-rackno') || '';
+                
+                rateInput.value = parseFloat(rate).toFixed(2);
+                racknoInput.value = rackno;
+                
+                // Recalculate total stock immediately
+                calculateTotalStock();
+            } else {
+                rateInput.value = '';
+                racknoInput.value = '';
+                totalStockInput.value = '';
+            }
+        });
+    }
+
+    // Auto calculate Total Stock = Total Nos × Rate
+    function calculateTotalStock() {
+        const totalNo = parseFloat(totalnoInput.value) || 0;
+        const rate = parseFloat(rateInput.value) || 0;
+        totalStockInput.value = (totalNo * rate).toFixed(2);
+    }
+
+    if (totalnoInput && rateInput && totalStockInput) {
+        totalnoInput.addEventListener('input', calculateTotalStock);
+        rateInput.addEventListener('input', calculateTotalStock);
+    }
+
+    // Trigger calculation on page load if editing
+    if (totalnoInput && rateInput) {
+        calculateTotalStock();
+    }
+    
+    // Trigger subcategory load for edit mode
+    if (categorySelect && categorySelect.value && subcategorySelect.options.length <= 1) {
+        const event = new Event('change');
+        categorySelect.dispatchEvent(event);
+    }
+});
+
+function resetForm() {
+    if (confirm('Are you sure you want to reset all form fields?')) {
+        document.getElementById('receiptForm').reset();
+        showNotification('Form has been reset successfully', 'success');
+    }
+}
+</script>
+{% endblock %}

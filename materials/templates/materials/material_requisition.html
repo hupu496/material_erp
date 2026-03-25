@@ -1,0 +1,986 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_title %}Material Requisition{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ==================== PREMIUM VARIABLES ==================== */
+    :root {
+        --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --gradient-success: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --gradient-danger: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        --gradient-warning: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+        --shadow-md: 0 5px 15px rgba(0,0,0,0.1);
+        --shadow-lg: 0 10px 30px rgba(0,0,0,0.2);
+        --shadow-xl: 0 20px 40px rgba(0,0,0,0.25);
+    }
+
+    /* ==================== ANIMATIONS ==================== */
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    /* ==================== HEADER SECTION ==================== */
+    .material-header {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+        backdrop-filter: blur(10px);
+        color: white;
+        padding: 2rem;
+        border-radius: 24px;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-xl);
+        position: relative;
+        overflow: hidden;
+        animation: slideInUp 0.5s ease-out;
+    }
+
+    .material-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+        animation: rotate 30s linear infinite;
+    }
+
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .material-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #fff, transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    .material-header h1 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .material-header .lead {
+        font-size: 1rem;
+        opacity: 0.95;
+    }
+
+    /* ==================== FORM CARD ==================== */
+    .form-card {
+        background: white;
+        border-radius: 28px;
+        padding: 2rem;
+        box-shadow: var(--shadow-lg);
+        transition: all 0.3s ease;
+        animation: scaleIn 0.5s ease-out;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    .form-card:hover {
+        box-shadow: var(--shadow-xl);
+        transform: translateY(-3px);
+    }
+
+    /* ==================== FORM CONTROLS ==================== */
+    .floating-label {
+        position: relative;
+        margin-bottom: 1.8rem;
+    }
+
+    .floating-label input,
+    .floating-label select,
+    .floating-label textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .floating-label textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .floating-label label {
+        position: absolute;
+        top: -12px;
+        left: 16px;
+        background: white;
+        padding: 0 8px;
+        font-size: 0.8rem;
+        color: #667eea;
+        font-weight: 600;
+        z-index: 1;
+        transition: all 0.3s ease;
+        border-radius: 20px;
+    }
+
+    .floating-label input:focus,
+    .floating-label select:focus,
+    .floating-label textarea:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        outline: none;
+        transform: translateY(-1px);
+    }
+
+    .floating-label input:hover:not(:focus),
+    .floating-label select:hover:not(:focus),
+    .floating-label textarea:hover:not(:focus) {
+        border-color: #764ba2;
+    }
+
+    /* Select styling */
+    select.floating-label select {
+        appearance: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23667eea' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        background-size: 16px;
+        padding-right: 40px;
+    }
+
+    /* Date input styling */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 8px;
+        padding: 4px;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.3s;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator:hover {
+        opacity: 1;
+    }
+
+    /* ==================== BUTTONS ==================== */
+    .btn-save {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 32px;
+        border-radius: 40px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-save:active {
+        transform: translateY(0);
+    }
+
+    .btn-save.loading {
+        position: relative;
+        pointer-events: none;
+        opacity: 0.8;
+    }
+
+    .btn-save.loading::after {
+        content: '';
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        top: 50%;
+        right: 20px;
+        margin-top: -9px;
+        border: 2px solid white;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #718096, #4a5568);
+        color: white;
+        border: none;
+        padding: 12px 28px;
+        border-radius: 40px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+
+    /* ==================== TABLE STYLES ==================== */
+    .table-container {
+        background: white;
+        border-radius: 24px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-lg);
+        animation: fadeIn 0.6s ease-out;
+        margin-top: 2rem;
+    }
+
+    .table-container h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-left: 4px solid #667eea;
+        padding-left: 15px;
+    }
+
+    .table-modern {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .table-modern thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .table-modern th {
+        padding: 1rem 1rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+    }
+
+    .table-modern td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+    .table-modern tr {
+        transition: all 0.3s ease;
+    }
+
+    .table-modern tr:hover {
+        background: linear-gradient(90deg, #f8f9ff, #ffffff);
+        transform: scale(1.01);
+    }
+
+    .table-modern tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Badge for stock numbers */
+    .stock-badge {
+        background: linear-gradient(135deg, #48bb78, #38a169);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+
+    .stock-badge-warning {
+        background: linear-gradient(135deg, #ed8936, #dd6b20);
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        color: white;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .btn-edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(253, 160, 133, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        color: white;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .btn-delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(235, 51, 73, 0.4);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #a0aec0;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    /* Notification Toast */
+    .notification-toast {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 50px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        z-index: 1000;
+        animation: slideInRight 0.3s ease-out;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .notification-toast.error {
+        background: linear-gradient(135deg, #fc8181, #f56565);
+    }
+
+    .notification-toast.success {
+        background: linear-gradient(135deg, #48bb78, #38a169);
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(100px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Form Validation */
+    .floating-label input.error,
+    .floating-label select.error,
+    .floating-label textarea.error {
+        border-color: #fc8181;
+        animation: shake 0.5s ease;
+        background: #fff5f5;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    /* Tooltip */
+    [data-tooltip] {
+        position: relative;
+        cursor: help;
+    }
+
+    [data-tooltip]:before {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 6px 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+        z-index: 10;
+        margin-bottom: 8px;
+    }
+
+    [data-tooltip]:hover:before {
+        opacity: 1;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .form-card {
+            padding: 1.5rem;
+        }
+
+        .material-header h1 {
+            font-size: 1.6rem;
+        }
+
+        .btn-save, .btn-secondary {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .table-container {
+            padding: 1rem;
+            overflow-x: auto;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .btn-edit, .btn-delete {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Premium Header -->
+    <div class="material-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="display-4 fw-bold">
+                    {% if is_edit %}
+                        <i class="fas fa-edit me-3"></i>Edit Material Requisition
+                    {% else %}
+                        <i class="fas fa-clipboard-list me-3"></i>Material Requisition
+                    {% endif %}
+                </h1>
+                <p class="lead">
+                    <i class="fas fa-arrow-right me-2"></i>
+                    {% if is_edit %}Update requisition details{% else %}Request materials from inventory{% endif %}
+                </p>
+            </div>
+            <div class="material-badge" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); padding: 0.8rem 1.5rem; border-radius: 60px;">
+                <i class="fas fa-chart-line me-2"></i>
+                Total Requisitions: {{ requisitions|length }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Premium Form Card -->
+    <div class="form-card">
+        <form method="POST" id="requisitionForm" novalidate>
+            {% csrf_token %}
+
+            <div class="row g-4">
+                <!-- Issue Date -->
+                <div class="col-md-6">
+                    <div class="floating-label">
+                        <label><i class="far fa-calendar-alt me-2"></i> Issue Date <span class="text-danger">*</span></label>
+                        <input name="issue_date" type="date" class="form-control-modern"
+                               value="{% if instance %}{{ instance.issue_date|date:'Y-m-d' }}{% else %}{{ today|date:'Y-m-d' }}{% endif %}" 
+                               required data-tooltip="Select the date of requisition">
+                    </div>
+                </div>
+
+                <!-- Entry No -->
+                <div class="col-md-6">
+                    <div class="floating-label">
+                        <label><i class="fas fa-hashtag me-2"></i> Entry No <span class="text-danger">*</span></label>
+                        <input name="entry_no" type="number" class="form-control-modern"
+                               value="{% if instance %}{{ instance.entry_no }}{% endif %}" 
+                               required data-tooltip="Unique entry number">
+                    </div>
+                </div>
+
+                <!-- Requisition No -->
+                <div class="col-md-6">
+                    <div class="floating-label">
+                        <label><i class="fas fa-file-alt me-2"></i> Requisition No</label>
+                        <input name="requisition_no" class="form-control-modern"
+                               value="{% if instance %}{{ instance.requisition_no }}{% endif %}"
+                               data-tooltip="Requisition reference number" placeholder="Enter requisition number">
+                    </div>
+                </div>
+
+                <!-- Category -->
+                <div class="col-md-6">
+                    <div class="floating-label">
+                        <label><i class="fas fa-layer-group me-2"></i> Category <span class="text-danger">*</span></label>
+                        <select id="category" name="category" class="form-control-modern" required data-tooltip="Select material category">
+                            <option value="">-- Select Category --</option>
+                            {% for c in categories %}
+                            <option value="{{c.id}}" {% if instance and instance.category_id == c.id %}selected{% endif %}>
+                                {{c.name}}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Sub Category -->
+                <div class="col-md-6">
+                    <div class="floating-label">
+                        <label><i class="fas fa-code-branch me-2"></i> Sub Category <span class="text-danger">*</span></label>
+                        <select id="subcategory" name="subcategory" class="form-control-modern" required data-tooltip="Select material sub-category">
+                            <option value="">-- Select SubCategory --</option>
+                            {% for sc in subcategories %}
+                            <option value="{{sc.id}}" {% if instance and instance.sub_category_id == sc.id %}selected{% endif %}>
+                                {{sc.sub_category}}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Work Spots -->
+                <div class="col-md-6">
+                    <div class="floating-label">
+                        <label><i class="fas fa-map-marker-alt me-2"></i> Work Spot <span class="text-danger">*</span></label>
+                        <select name="work_spots" class="form-control-modern" required data-tooltip="Select work location">
+                            <option value="">-- Select Work Spot --</option>
+                            {% for w in workspots %}
+                            <option value="{{w.id}}" {% if instance and instance.work_spots_id == w.id %}selected{% endif %}>
+                                {{w.name}}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Item -->
+                <div class="col-md-12">
+                    <div class="floating-label">
+                        <label><i class="fas fa-boxes me-2"></i> Item <span class="text-danger">*</span></label>
+                        <select name="item" id="item" class="form-control-modern" required data-tooltip="Select material item">
+                            <option value="">-- Select Item --</option>
+                            {% for m in materials %}
+                            <option value="{{m.id}}" 
+                                    data-available="{{ m.item_available_stock|default:0 }}"
+                                    {% if instance and instance.item_id == m.id %}selected{% endif %}>
+                                {{ m.description }} ({{ m.category.name }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Total Nos (Available Stock) -->
+                <div class="col-md-6">
+                    <div class="floating-label">
+                        <label><i class="fas fa-cubes me-2"></i> Total Nos (Available Stock) <span class="text-danger">*</span></label>
+                        <input name="total_nos" id="total_nos" type="number" class="form-control-modern"
+                               value="{% if instance %}{{ instance.total_nos }}{% endif %}" 
+                               required data-tooltip="Available stock quantity">
+                        <div class="form-hint" style="font-size: 0.7rem; margin-top: 0.25rem; margin-left: 1rem; color: #718096;">
+                            <i class="fas fa-info-circle"></i> Auto-filled with available stock from inventory
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Requisition By -->
+                <div class="col-md-6">
+                    <div class="floating-label">
+                        <label><i class="fas fa-user me-2"></i> Requisition By <span class="text-danger">*</span></label>
+                        <input name="requisition_by" class="form-control-modern"
+                               value="{% if instance %}{{ instance.requisition_by }}{% endif %}" 
+                               required data-tooltip="Person requesting the material" placeholder="Enter requester name">
+                    </div>
+                </div>
+
+                <!-- Remarks -->
+                <div class="col-md-12">
+                    <div class="floating-label">
+                        <label><i class="fas fa-pen-alt me-2"></i> Remarks</label>
+                        <textarea name="remarks" rows="3" class="form-control-modern" 
+                                  data-tooltip="Additional notes" placeholder="Enter any additional notes or comments...">{% if instance %}{{ instance.remarks }}{% endif %}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Premium Button Area -->
+            <div class="text-center mt-4 pt-3 d-flex flex-wrap justify-content-center gap-3">
+                <button type="submit" class="btn-save" id="submitBtn">
+                    <i class="fas fa-save"></i> 
+                    {% if is_edit %}Update Requisition{% else %}Save Requisition{% endif %}
+                </button>
+                {% if is_edit %}
+                <a href="{% url 'material_requisition' %}" class="btn-secondary">
+                    <i class="fas fa-times-circle me-2"></i> Cancel
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Premium Table Section -->
+    <div class="table-container">
+        <h3>
+            <i class="fas fa-list-alt"></i>
+            All Material Requisitions
+        </h3>
+        
+        <div style="overflow-x: auto;">
+            <table class="table-modern">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-calendar me-1"></i> Date</th>
+                        <th><i class="fas fa-hashtag me-1"></i> Req No</th>
+                        <th><i class="fas fa-box me-1"></i> Item</th>
+                        <th><i class="fas fa-cubes me-1"></i> Quantity</th>
+                        <th><i class="fas fa-map-marker me-1"></i> Work Spot</th>
+                        <th><i class="fas fa-user me-1"></i> Requisition By</th>
+                        <th><i class="fas fa-cog me-1"></i> Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requisitions %}
+                    <tr>
+                        <td><strong>{{ req.issue_date|date:'d-m-Y' }}</strong></td>
+                        <td><span class="stock-badge">{{ req.requisition_no }}</span></td>
+                        <td>{{ req.item.description|truncatechars:40 }}</td>
+                        <td><span class="stock-badge">{{ req.total_nos }}</span></td>
+                        <td><i class="fas fa-location-dot me-1" style="color: #667eea;"></i> {{ req.work_spots.name }}</td>
+                        <td><i class="fas fa-user-circle me-1" style="color: #667eea;"></i> {{ req.requisition_by }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'material_requisition' req.pk %}" class="btn-edit" data-tooltip="Edit requisition">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <form method="post" action="{% url 'material_requisition_delete' req.pk %}" 
+                                      style="display:inline;" 
+                                      onsubmit="return confirm('⚠️ Are you sure you want to delete this requisition? This action cannot be undone.')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-delete" data-tooltip="Delete requisition">
+                                        <i class="fas fa-trash-alt"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <i class="fas fa-clipboard-list"></i>
+                                <p><strong>No requisitions yet</strong></p>
+                                <p class="text-muted">Start by creating a new material requisition above</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Premium JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form elements
+    const form = document.getElementById('requisitionForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const categorySelect = document.getElementById('category');
+    const subcategorySelect = document.getElementById('subcategory');
+    const itemSelect = document.getElementById('item');
+    const totalNosInput = document.getElementById('total_nos');
+
+    // ==================== CATEGORY → SUBCATEGORY AJAX ====================
+    if (categorySelect) {
+        categorySelect.addEventListener('change', function() {
+            const categoryId = this.value;
+            
+            if (!categoryId) {
+                subcategorySelect.innerHTML = '<option value="">-- Select SubCategory --</option>';
+                return;
+            }
+            
+            subcategorySelect.innerHTML = '<option value="">✨ Loading subcategories...</option>';
+            subcategorySelect.disabled = true;
+            
+            fetch("/materials/load-subcategory/?category=" + categoryId)
+                .then(response => response.json())
+                .then(data => {
+                    subcategorySelect.innerHTML = '<option value="">-- Select SubCategory --</option>';
+                    data.forEach(function(item) {
+                        subcategorySelect.innerHTML += `<option value="${item.id}">✨ ${escapeHtml(item.sub_category)}</option>`;
+                    });
+                    subcategorySelect.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    subcategorySelect.innerHTML = '<option value="">⚠️ Error loading subcategories</option>';
+                    subcategorySelect.disabled = false;
+                    showNotification('Failed to load subcategories', 'error');
+                });
+        });
+    }
+
+    // ==================== AUTO FILL AVAILABLE STOCK ====================
+    if (itemSelect && totalNosInput) {
+        itemSelect.addEventListener('change', function() {
+            const option = this.options[this.selectedIndex];
+            if (option.value) {
+                const availableStock = option.getAttribute('data-available') || 0;
+                totalNosInput.value = availableStock;
+                
+                // Visual feedback
+                totalNosInput.style.background = 'linear-gradient(135deg, #f0f9ff, #e6f7ff)';
+                totalNosInput.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    totalNosInput.style.background = '';
+                    totalNosInput.style.transform = '';
+                }, 500);
+                
+                if (availableStock == 0) {
+                    showNotification('⚠️ This item is out of stock!', 'warning');
+                }
+            } else {
+                totalNosInput.value = '';
+            }
+        });
+        
+        // Trigger on edit mode
+        if (itemSelect.value) {
+            const event = new Event('change');
+            itemSelect.dispatchEvent(event);
+        }
+    }
+
+    // ==================== FORM VALIDATION ====================
+    function validateForm() {
+        let isValid = true;
+        const requiredFields = form.querySelectorAll('[required]');
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('error');
+                
+                setTimeout(() => {
+                    field.classList.remove('error');
+                }, 500);
+            } else {
+                field.classList.remove('error');
+            }
+        });
+        
+        return isValid;
+    }
+
+    // ==================== NOTIFICATION SYSTEM ====================
+    function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification-toast ${type}`;
+        notification.innerHTML = `
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'} me-2"></i>
+            <span>${escapeHtml(message)}</span>
+        `;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideInRight 0.3s ease-out reverse';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    // ==================== ESCAPE HTML ====================
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // ==================== FORM SUBMIT HANDLER ====================
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (!validateForm()) {
+                e.preventDefault();
+                showNotification('⚠️ Please fill all required fields marked with *', 'error');
+                return;
+            }
+            
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+            showNotification('🚀 Processing your request...', 'success');
+        });
+    }
+
+    // ==================== REAL-TIME VALIDATION ====================
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.classList.remove('error');
+            }
+        });
+        
+        input.addEventListener('blur', function() {
+            if (this.hasAttribute('required') && !this.value.trim()) {
+                this.classList.add('error');
+            } else {
+                this.classList.remove('error');
+            }
+        });
+    });
+
+    // ==================== KEYBOARD SHORTCUTS ====================
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            submitBtn.click();
+            showNotification('⌨️ Saving requisition...', 'success');
+        }
+    });
+
+    // ==================== TRIGGER SUBCATEGORY LOAD FOR EDIT MODE ====================
+    if (categorySelect && categorySelect.value && subcategorySelect.options.length <= 1) {
+        const event = new Event('change');
+        categorySelect.dispatchEvent(event);
+    }
+
+    // ==================== INPUT FOCUS EFFECTS ====================
+    const floatingInputs = document.querySelectorAll('.floating-label input, .floating-label select, .floating-label textarea');
+    floatingInputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.querySelector('label').style.color = '#764ba2';
+            this.parentElement.querySelector('label').style.transform = 'scale(1.02)';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.querySelector('label').style.color = '#667eea';
+            this.parentElement.querySelector('label').style.transform = 'scale(1)';
+        });
+    });
+});
+
+// Global notification function
+window.showNotification = showNotification;
+</script>
+{% endblock %}

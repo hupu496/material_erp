@@ -1,0 +1,1060 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_title %}Material Outward{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ==================== PREMIUM VARIABLES ==================== */
+    :root {
+        --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --gradient-success: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --gradient-danger: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        --gradient-warning: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+        --shadow-md: 0 5px 15px rgba(0,0,0,0.1);
+        --shadow-lg: 0 10px 30px rgba(0,0,0,0.2);
+        --shadow-xl: 0 20px 40px rgba(0,0,0,0.25);
+    }
+
+    /* ==================== ANIMATIONS ==================== */
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* ==================== HEADER SECTION ==================== */
+    .material-header {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+        backdrop-filter: blur(10px);
+        color: white;
+        padding: 2rem;
+        border-radius: 24px;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-xl);
+        position: relative;
+        overflow: hidden;
+        animation: slideInUp 0.5s ease-out;
+    }
+
+    .material-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+        animation: rotate 30s linear infinite;
+    }
+
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .material-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #fff, transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    .material-header h1 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .material-header .lead {
+        font-size: 1rem;
+        opacity: 0.95;
+    }
+
+    /* ==================== FORM CARD ==================== */
+    .form-card {
+        background: white;
+        border-radius: 28px;
+        padding: 2rem;
+        box-shadow: var(--shadow-lg);
+        transition: all 0.3s ease;
+        animation: scaleIn 0.5s ease-out;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    .form-card:hover {
+        box-shadow: var(--shadow-xl);
+        transform: translateY(-3px);
+    }
+
+    /* ==================== FORM CONTROLS ==================== */
+    .floating-label {
+        position: relative;
+        margin-bottom: 1.8rem;
+    }
+
+    .floating-label input,
+    .floating-label select,
+    .floating-label textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .floating-label textarea {
+        min-height: 80px;
+        resize: vertical;
+    }
+
+    .floating-label label {
+        position: absolute;
+        top: -12px;
+        left: 16px;
+        background: white;
+        padding: 0 8px;
+        font-size: 0.8rem;
+        color: #667eea;
+        font-weight: 600;
+        z-index: 1;
+        transition: all 0.3s ease;
+        border-radius: 20px;
+    }
+
+    .floating-label input:focus,
+    .floating-label select:focus,
+    .floating-label textarea:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        outline: none;
+        transform: translateY(-1px);
+    }
+
+    .floating-label input:hover:not(:focus),
+    .floating-label select:hover:not(:focus),
+    .floating-label textarea:hover:not(:focus) {
+        border-color: #764ba2;
+    }
+
+    /* Read-only field styling */
+    .floating-label input[readonly],
+    .floating-label textarea[readonly] {
+        background: #f7fafc;
+        cursor: not-allowed;
+        border-color: #e2e8f0;
+    }
+
+    .floating-label input[readonly]:focus,
+    .floating-label textarea[readonly]:focus {
+        transform: none;
+    }
+
+    /* Select styling */
+    select.form-control-modern {
+        appearance: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23667eea' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        background-size: 16px;
+        padding-right: 40px;
+    }
+
+    /* Date input styling */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 8px;
+        padding: 4px;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.3s;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator:hover {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+    /* ==================== BUTTONS ==================== */
+    .btn-save {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 32px;
+        border-radius: 40px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-save:active {
+        transform: translateY(0);
+    }
+
+    .btn-save.loading {
+        position: relative;
+        pointer-events: none;
+        opacity: 0.8;
+    }
+
+    .btn-save.loading::after {
+        content: '';
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        top: 50%;
+        right: 20px;
+        margin-top: -9px;
+        border: 2px solid white;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #718096, #4a5568);
+        color: white;
+        border: none;
+        padding: 12px 28px;
+        border-radius: 40px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+
+    /* ==================== TABLE STYLES ==================== */
+    .table-container {
+        background: white;
+        border-radius: 24px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-lg);
+        animation: fadeIn 0.6s ease-out;
+        margin-top: 2rem;
+    }
+
+    .table-container h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-left: 4px solid #667eea;
+        padding-left: 15px;
+    }
+
+    .table-modern {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .table-modern thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .table-modern th {
+        padding: 1rem 1rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+    }
+
+    .table-modern td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+    .table-modern tr {
+        transition: all 0.3s ease;
+    }
+
+    .table-modern tr:hover {
+        background: linear-gradient(90deg, #f8f9ff, #ffffff);
+        transform: scale(1.01);
+    }
+
+    .table-modern tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Badge styles */
+    .badge-outward {
+        background: linear-gradient(135deg, #48bb78, #38a169);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        color: white;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .btn-edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(253, 160, 133, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        color: white;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .btn-delete:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(235, 51, 73, 0.4);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #a0aec0;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    /* Notification Toast */
+    .notification-toast {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 50px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        z-index: 1000;
+        animation: slideInRight 0.3s ease-out;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .notification-toast.error {
+        background: linear-gradient(135deg, #fc8181, #f56565);
+    }
+
+    .notification-toast.success {
+        background: linear-gradient(135deg, #48bb78, #38a169);
+    }
+
+    .notification-toast.warning {
+        background: linear-gradient(135deg, #ed8936, #dd6b20);
+    }
+
+    /* Form Validation */
+    .floating-label input.error,
+    .floating-label select.error,
+    .floating-label textarea.error {
+        border-color: #fc8181;
+        animation: shake 0.5s ease;
+        background: #fff5f5;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    /* Tooltip */
+    [data-tooltip] {
+        position: relative;
+        cursor: help;
+    }
+
+    [data-tooltip]:before {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 6px 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+        z-index: 10;
+        margin-bottom: 8px;
+    }
+
+    [data-tooltip]:hover:before {
+        opacity: 1;
+    }
+
+    /* Form Hint */
+    .form-hint {
+        font-size: 0.7rem;
+        margin-top: 0.5rem;
+        margin-left: 1rem;
+        color: #718096;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .form-hint i {
+        color: #667eea;
+        font-size: 0.8rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .form-card {
+            padding: 1.5rem;
+        }
+
+        .material-header h1 {
+            font-size: 1.6rem;
+        }
+
+        .btn-save, .btn-secondary {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .table-container {
+            padding: 1rem;
+            overflow-x: auto;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .btn-edit, .btn-delete {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+
+    /* Loading indicator for AJAX */
+    .loading-indicator {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #667eea;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+        margin-left: 8px;
+        vertical-align: middle;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Premium Header -->
+    <div class="material-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="display-4 fw-bold">
+                    {% if is_edit %}
+                        <i class="fas fa-edit me-3"></i>Edit Material Outward
+                    {% else %}
+                        <i class="fas fa-upload me-3"></i>Material Outward
+                    {% endif %}
+                </h1>
+                <p class="lead">
+                    <i class="fas fa-arrow-right me-2"></i>
+                    {% if is_edit %}Update outward details{% else %}Issue material from inventory{% endif %}
+                </p>
+            </div>
+            <div class="material-badge" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); padding: 0.8rem 1.5rem; border-radius: 60px;">
+                <i class="fas fa-chart-line me-2"></i>
+                Total Outward: {{ outward_list|length }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Premium Form Card -->
+    <div class="form-card">
+        <form method="POST" id="outwardForm" novalidate>
+            {% csrf_token %}
+
+            <div class="row g-4">
+                <!-- Entry No - Auto Fetch -->
+                <div class="col-md-6">
+                    <div class="floating-label">
+                        <label><i class="fas fa-hashtag me-2"></i> Entry No (From Receipt) <span class="text-danger">*</span></label>
+                        <input name="entry_no" id="entry_no" type="number" 
+                               class="form-control-modern" 
+                               value="{% if instance %}{{ instance.entry_no }}{% endif %}" 
+                               required data-tooltip="Enter receipt entry number to auto-fetch details">
+                        <div class="form-hint">
+                            <i class="fas fa-info-circle"></i> Enter entry number to auto-fetch receipt details
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Issue Date -->
+                <div class="col-md-6">
+                    <div class="floating-label">
+                        <label><i class="far fa-calendar-alt me-2"></i> Issue Date <span class="text-danger">*</span></label>
+                        <input name="issue_date" type="date" class="form-control-modern"
+                               value="{% if instance %}{{ instance.issue_date|date:'Y-m-d' }}{% else %}{{ today|date:'Y-m-d' }}{% endif %}" 
+                               required data-tooltip="Select the date of material issue">
+                    </div>
+                </div>
+
+                <!-- Location -->
+                <div class="col-md-6">
+                    <div class="floating-label">
+                        <label><i class="fas fa-map-marker-alt me-2"></i> Location</label>
+                        <input name="location" class="form-control-modern"
+                               value="{% if instance %}{{ instance.location }}{% endif %}"
+                               data-tooltip="Storage location" placeholder="Enter storage location">
+                    </div>
+                </div>
+
+                <!-- Contents -->
+                <div class="col-md-6">
+                    <div class="floating-label">
+                        <label><i class="fas fa-box me-2"></i> Contents</label>
+                        <input name="contents" class="form-control-modern"
+                               value="{% if instance %}{{ instance.contents }}{% endif %}"
+                               data-tooltip="Contents description" placeholder="Enter contents">
+                    </div>
+                </div>
+
+                <!-- Contents 2 -->
+                <div class="col-md-6">
+                    <div class="floating-label">
+                        <label><i class="fas fa-boxes me-2"></i> Contents 2</label>
+                        <input name="contents2" class="form-control-modern"
+                               value="{% if instance %}{{ instance.contents2 }}{% endif %}"
+                               data-tooltip="Additional contents" placeholder="Enter additional contents">
+                    </div>
+                </div>
+
+                <!-- Auto-filled from Receipt -->
+                <div class="col-md-12">
+                    <div class="floating-label">
+                        <label><i class="fas fa-file-alt me-2"></i> Description (Auto from Receipt)</label>
+                        <textarea id="description" name="description" rows="2" class="form-control-modern" readonly
+                                  data-tooltip="Auto-filled from receipt">{% if instance %}{{ instance.description }}{% endif %}</textarea>
+                    </div>
+                </div>
+
+                <!-- Total Nos (Auto from Receipt) -->
+                <div class="col-md-6">
+                    <div class="floating-label">
+                        <label><i class="fas fa-cubes me-2"></i> Total Nos (Auto from Receipt)</label>
+                        <input name="totalno" id="totalno" type="number" class="form-control-modern"
+                               value="{% if instance %}{{ instance.totalno }}{% endif %}" readonly
+                               data-tooltip="Auto-filled from receipt">
+                    </div>
+                </div>
+
+                <!-- Vendor -->
+                <div class="col-md-6">
+                    <div class="floating-label">
+                        <label><i class="fas fa-store me-2"></i> Vendor</label>
+                        <input name="vendor" class="form-control-modern"
+                               value="{% if instance %}{{ instance.vendor }}{% endif %}"
+                               data-tooltip="Vendor name" placeholder="Enter vendor name">
+                    </div>
+                </div>
+
+                <!-- Issued To -->
+                <div class="col-md-6">
+                    <div class="floating-label">
+                        <label><i class="fas fa-user me-2"></i> Issued To <span class="text-danger">*</span></label>
+                        <input name="issuedto" class="form-control-modern"
+                               value="{% if instance %}{{ instance.issuedto }}{% endif %}"
+                               required data-tooltip="Person/Department receiving material" placeholder="Enter recipient name">
+                    </div>
+                </div>
+
+                <!-- Vehicle No -->
+                <div class="col-md-6">
+                    <div class="floating-label">
+                        <label><i class="fas fa-truck me-2"></i> Vehicle No</label>
+                        <input name="vehicleno" class="form-control-modern"
+                               value="{% if instance %}{{ instance.vehicleno }}{% endif %}"
+                               data-tooltip="Vehicle registration number" placeholder="Enter vehicle number">
+                    </div>
+                </div>
+
+                <!-- Purpose -->
+                <div class="col-md-12">
+                    <div class="floating-label">
+                        <label><i class="fas fa-bullseye me-2"></i> Purpose</label>
+                        <input name="purpose" class="form-control-modern"
+                               value="{% if instance %}{{ instance.purpose }}{% endif %}"
+                               data-tooltip="Purpose of material issue" placeholder="Enter purpose">
+                    </div>
+                </div>
+
+                <!-- Issuer -->
+                <div class="col-md-6">
+                    <div class="floating-label">
+                        <label><i class="fas fa-user-check me-2"></i> Issuer</label>
+                        <input name="issuer" class="form-control-modern"
+                               value="{% if instance %}{{ instance.issuer }}{% endif %}"
+                               data-tooltip="Person issuing material" placeholder="Enter issuer name">
+                    </div>
+                </div>
+
+                <!-- Returnable -->
+                <div class="col-md-6">
+                    <div class="floating-label">
+                        <label><i class="fas fa-undo-alt me-2"></i> Returnable</label>
+                        <select name="returnable" class="form-control-modern" data-tooltip="Is the material returnable?">
+                            <option value="True" {% if instance and instance.returnable %}selected{% endif %}>
+                                <i class="fas fa-check-circle"></i> Yes
+                            </option>
+                            <option value="False" {% if instance and not instance.returnable %}selected{% endif %}>
+                                <i class="fas fa-times-circle"></i> No
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Remarks -->
+                <div class="col-md-12">
+                    <div class="floating-label">
+                        <label><i class="fas fa-pen-alt me-2"></i> Remarks</label>
+                        <textarea name="remarks" rows="3" class="form-control-modern" 
+                                  data-tooltip="Additional notes" placeholder="Enter any additional notes or comments...">{% if instance %}{{ instance.remarks }}{% endif %}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Premium Button Area -->
+            <div class="text-center mt-4 pt-3 d-flex flex-wrap justify-content-center gap-3">
+                <button type="submit" class="btn-save" id="submitBtn">
+                    <i class="fas fa-save"></i> 
+                    {% if is_edit %}Update Outward{% else %}Save Outward{% endif %}
+                </button>
+                {% if is_edit %}
+                <a href="{% url 'material_outward' %}" class="btn-secondary">
+                    <i class="fas fa-times-circle me-2"></i> Cancel
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Premium Table Section -->
+    <div class="table-container">
+        <h3>
+            <i class="fas fa-truck-moving"></i>
+            Material Outward Records
+        </h3>
+        
+        <div style="overflow-x: auto;">
+            <table class="table-modern">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-calendar me-1"></i> Date</th>
+                        <th><i class="fas fa-hashtag me-1"></i> Entry No</th>
+                        <th><i class="fas fa-user me-1"></i> Issued To</th>
+                        <th><i class="fas fa-cubes me-1"></i> Total Nos</th>
+                        <th><i class="fas fa-bullseye me-1"></i> Purpose</th>
+                        <th><i class="fas fa-cog me-1"></i> Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in outward_list %}
+                    <tr>
+                        <td><strong>{{ item.issue_date|date:'d-m-Y' }}</strong></td>
+                        <td><span class="badge-outward">{{ item.entry_no }}</span></td>
+                        <td><i class="fas fa-user-circle me-1" style="color: #667eea;"></i> {{ item.issuedto }}</td>
+                        <td><span class="badge-outward">{{ item.totalno }}</span></td>
+                        <td>{{ item.purpose|default:"-"|truncatechars:30 }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'material_outward' item.pk %}" class="btn-edit" data-tooltip="Edit outward record">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <form method="post" action="{% url 'material_outward_delete' item.pk %}" 
+                                      style="display:inline;" 
+                                      onsubmit="return confirm('⚠️ Are you sure you want to delete this outward record? This action cannot be undone.')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-delete" data-tooltip="Delete outward record">
+                                        <i class="fas fa-trash-alt"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <i class="fas fa-truck-moving"></i>
+                                <p><strong>No outward records found</strong></p>
+                                <p class="text-muted">Start by creating a new material outward entry above</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Premium JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form elements
+    const form = document.getElementById('outwardForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const entryNoInput = document.getElementById('entry_no');
+    const totalNoInput = document.getElementById('totalno');
+    const descriptionInput = document.getElementById('description');
+    
+    let fetchInProgress = false;
+
+    // ==================== ENTRY NO AUTO-FETCH ====================
+    if (entryNoInput) {
+        let debounceTimer;
+        
+        entryNoInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            const entryNo = this.value.trim();
+            
+            if (!entryNo) return;
+            
+            debounceTimer = setTimeout(() => {
+                fetchReceiptDetails(entryNo);
+            }, 500);
+        });
+        
+        entryNoInput.addEventListener('blur', function() {
+            const entryNo = this.value.trim();
+            if (entryNo && !fetchInProgress) {
+                fetchReceiptDetails(entryNo);
+            }
+        });
+        
+        function fetchReceiptDetails(entryNo) {
+            if (fetchInProgress) return;
+            
+            fetchInProgress = true;
+            
+            // Add loading indicator
+            const loadingIndicator = document.createElement('span');
+            loadingIndicator.className = 'loading-indicator';
+            entryNoInput.parentElement.appendChild(loadingIndicator);
+            
+            fetch(`/materials/outward/fetch-receipt/?entry_no=${entryNo}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        totalNoInput.value = data.totalno || '';
+                        descriptionInput.value = data.description || '';
+                        showNotification(`✅ Data fetched successfully!\nTotal Nos: ${data.totalno}`, 'success');
+                        
+                        // Visual feedback for auto-filled fields
+                        [totalNoInput, descriptionInput].forEach(field => {
+                            if (field) {
+                                field.style.background = 'linear-gradient(135deg, #f0f9ff, #e6f7ff)';
+                                field.style.transform = 'scale(1.02)';
+                                setTimeout(() => {
+                                    field.style.background = '';
+                                    field.style.transform = '';
+                                }, 500);
+                            }
+                        });
+                    } else {
+                        showNotification(`❌ ${data.error || 'No receipt found for this entry number'}`, 'error');
+                        totalNoInput.value = '';
+                        descriptionInput.value = '';
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching receipt:', err);
+                    showNotification('❌ Error connecting to server', 'error');
+                })
+                .finally(() => {
+                    fetchInProgress = false;
+                    const indicator = entryNoInput.parentElement.querySelector('.loading-indicator');
+                    if (indicator) indicator.remove();
+                });
+        }
+    }
+
+    // ==================== FORM VALIDATION ====================
+    function validateForm() {
+        let isValid = true;
+        const requiredFields = form.querySelectorAll('[required]');
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('error');
+                
+                setTimeout(() => {
+                    field.classList.remove('error');
+                }, 500);
+            } else {
+                field.classList.remove('error');
+            }
+        });
+        
+        // Additional validation for entry number if it exists
+        if (entryNoInput && entryNoInput.value.trim() && !totalNoInput.value) {
+            showNotification('⚠️ Please wait for receipt details to load', 'warning');
+            isValid = false;
+        }
+        
+        return isValid;
+    }
+
+    // ==================== NOTIFICATION SYSTEM ====================
+    function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification-toast ${type}`;
+        notification.innerHTML = `
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-exclamation-circle'} me-2"></i>
+            <span>${escapeHtml(message)}</span>
+        `;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideInRight 0.3s ease-out reverse';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    // ==================== ESCAPE HTML ====================
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // ==================== FORM SUBMIT HANDLER ====================
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (!validateForm()) {
+                e.preventDefault();
+                showNotification('⚠️ Please fill all required fields marked with *', 'error');
+                return;
+            }
+            
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+            showNotification('🚀 Processing your request...', 'success');
+        });
+    }
+
+    // ==================== REAL-TIME VALIDATION ====================
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.classList.remove('error');
+            }
+        });
+        
+        input.addEventListener('blur', function() {
+            if (this.hasAttribute('required') && !this.value.trim()) {
+                this.classList.add('error');
+            } else {
+                this.classList.remove('error');
+            }
+        });
+    });
+
+    // ==================== KEYBOARD SHORTCUTS ====================
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            submitBtn.click();
+            showNotification('⌨️ Saving outward record...', 'success');
+        }
+    });
+
+    // ==================== INPUT FOCUS EFFECTS ====================
+    const floatingInputs = document.querySelectorAll('.floating-label input, .floating-label select, .floating-label textarea');
+    floatingInputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.querySelector('label').style.color = '#764ba2';
+            this.parentElement.querySelector('label').style.transform = 'scale(1.02)';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.querySelector('label').style.color = '#667eea';
+            this.parentElement.querySelector('label').style.transform = 'scale(1)';
+        });
+    });
+    
+    // ==================== ADD PLACEHOLDER ANIMATION ====================
+    const allInputs = document.querySelectorAll('.form-control-modern');
+    allInputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.style.letterSpacing = '0.3px';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.style.letterSpacing = 'normal';
+        });
+    });
+});
+
+// Global notification function
+window.showNotification = showNotification;
+</script>
+{% endblock %}
