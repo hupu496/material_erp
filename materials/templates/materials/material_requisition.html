@@ -598,31 +598,50 @@
             {% csrf_token %}
 
             <div class="row g-4">
-                <!-- Issue Date -->
+                <!-- Entry No -->
                 <div class="col-md-6">
                     <div class="floating-label">
+                        <label>
+                            <i class="fas fa-hashtag me-2"></i> Entry No
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input id="entry_no"
+                            name="entry_no"
+                            type="number"
+                            class="form-control-modern"
+                            value="{% if instance %}{{ instance.entry_no }}{% endif %}"
+                            required>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="floating-label">
+                        <label>
+                            <i class="fas fa-hashtag me-2"></i> PO NUMBER
+                            <span class="text-danger">(Optional)</span>
+                        </label>
+
+                        <input id="po"
+                            name="po"
+                            type="text"
+                            class="form-control-modern"
+                            value="{% if instance %}{{ instance.po }}{% endif %}">
+                    </div>
+                </div>
+                 <div class="col-md-6">
+                    <div class="floating-label">
                         <label><i class="far fa-calendar-alt me-2"></i> Issue Date <span class="text-danger">*</span></label>
-                        <input name="issue_date" type="date" class="form-control-modern"
+                        <input name="issue_date" type="date" class="form-control-modern" id="issue_date"
                                value="{% if instance %}{{ instance.issue_date|date:'Y-m-d' }}{% else %}{{ today|date:'Y-m-d' }}{% endif %}" 
                                required data-tooltip="Select the date of requisition">
                     </div>
                 </div>
-
-                <!-- Entry No -->
-                <div class="col-md-6">
-                    <div class="floating-label">
-                        <label><i class="fas fa-hashtag me-2"></i> Entry No <span class="text-danger">*</span></label>
-                        <input name="entry_no" type="number" class="form-control-modern"
-                               value="{% if instance %}{{ instance.entry_no }}{% endif %}" 
-                               required data-tooltip="Unique entry number">
-                    </div>
-                </div>
-
                 <!-- Requisition No -->
                 <div class="col-md-6">
                     <div class="floating-label">
                         <label><i class="fas fa-file-alt me-2"></i> Requisition No</label>
-                        <input name="requisition_no" class="form-control-modern"
+                        <input name="requisition_no" class="form-control-modern" id=""
                                value="{% if instance %}{{ instance.requisition_no }}{% endif %}"
                                data-tooltip="Requisition reference number" placeholder="Enter requisition number">
                     </div>
@@ -647,7 +666,7 @@
                 <div class="col-md-6">
                     <div class="floating-label">
                         <label><i class="fas fa-code-branch me-2"></i> Sub Category <span class="text-danger">*</span></label>
-                        <select id="subcategory" name="subcategory" class="form-control-modern" required data-tooltip="Select material sub-category">
+                        <select id="sub_category" name="subcategory" class="form-control-modern" required data-tooltip="Select material sub-category">
                             <option value="">-- Select SubCategory --</option>
                             {% for sc in subcategories %}
                             <option value="{{sc.id}}" {% if instance and instance.sub_category_id == sc.id %}selected{% endif %}>
@@ -662,7 +681,7 @@
                 <div class="col-md-6">
                     <div class="floating-label">
                         <label><i class="fas fa-map-marker-alt me-2"></i> Work Spot <span class="text-danger">*</span></label>
-                        <select name="work_spots" class="form-control-modern" required data-tooltip="Select work location">
+                        <select name="work_spots"  class="form-control-modern" required data-tooltip="Select work location">
                             <option value="">-- Select Work Spot --</option>
                             {% for w in workspots %}
                             <option value="{{w.id}}" {% if instance and instance.work_spots_id == w.id %}selected{% endif %}>
@@ -674,7 +693,7 @@
                 </div>
 
                 <!-- Item -->
-                <div class="col-md-12">
+                <div class="col-md-6">
                     <div class="floating-label">
                         <label><i class="fas fa-boxes me-2"></i> Item <span class="text-danger">*</span></label>
                         <select name="item" id="item" class="form-control-modern" required data-tooltip="Select material item">
@@ -694,9 +713,7 @@
                 <div class="col-md-6">
                     <div class="floating-label">
                         <label><i class="fas fa-cubes me-2"></i> Total Nos (Available Stock) <span class="text-danger">*</span></label>
-                        <input name="total_nos" id="total_nos" type="number" class="form-control-modern"
-                               value="{% if instance %}{{ instance.total_nos }}{% endif %}" 
-                               required data-tooltip="Available stock quantity">
+                        <input id="total_stock" name="total_stock"  type="text" value="{% if instance %}{{ instance.total_stock }}{% endif %}">
                         <div class="form-hint" style="font-size: 0.7rem; margin-top: 0.25rem; margin-left: 1rem; color: #718096;">
                             <i class="fas fa-info-circle"></i> Auto-filled with available stock from inventory
                         </div>
@@ -717,9 +734,10 @@
                 <div class="col-md-12">
                     <div class="floating-label">
                         <label><i class="fas fa-pen-alt me-2"></i> Remarks</label>
-                        <textarea name="remarks" rows="3" class="form-control-modern" 
-                                  data-tooltip="Additional notes" placeholder="Enter any additional notes or comments...">{% if instance %}{{ instance.remarks }}{% endif %}</textarea>
-                    </div>
+                        <textarea name="remarks" id="remarks" rows="3"
+                            class="form-control-modern"
+                            data-tooltip="Additional notes"
+                            placeholder="Enter any additional notes or comments...">{% if instance %}{{ instance.remarks }}{% endif %}</textarea>
                 </div>
             </div>
 
@@ -810,6 +828,119 @@ document.addEventListener('DOMContentLoaded', function() {
     const subcategorySelect = document.getElementById('subcategory');
     const itemSelect = document.getElementById('item');
     const totalNosInput = document.getElementById('total_nos');
+    const entryNoInput = document.getElementById('entry_no');
+    const poInput = document.getElementById('po');
+    const totalStockField = document.getElementById('total_stock');
+    const remarksField = document.getElementById('remarks');
+
+   
+    let fetchInProgress = false;
+    let debounceTimer;
+
+    if (entryNoInput) {
+
+    entryNoInput.addEventListener('input', function () {
+
+        clearTimeout(debounceTimer);
+
+        const entryNo = this.value.trim();
+
+        if (!entryNo) return;
+
+        debounceTimer = setTimeout(() => {
+            fetchReceiptDetails({
+                entry_no: entryNo
+            });
+        }, 500);
+    });
+}
+
+// =========================
+// PO SEARCH
+// =========================
+if (poInput) {
+
+    poInput.addEventListener('input', function () {
+
+        clearTimeout(debounceTimer);
+
+        const po = this.value.trim();
+
+        if (!po) return;
+
+        debounceTimer = setTimeout(() => {
+            fetchReceiptDetails({
+                po: po
+            });
+        }, 500);
+    });
+}
+
+// =========================
+// FETCH FUNCTION
+// =========================
+function fetchReceiptDetails(params) {
+
+    if (fetchInProgress) return;
+
+    fetchInProgress = true;
+
+    const query = new URLSearchParams(params).toString();
+
+    fetch(`/materials/outward/fetch-receipt/?${query}`)
+        .then(response => response.json())
+
+        .then(data => {
+
+            if (data.success) {
+                console.log(data);
+
+                // AUTO FILL
+                        // SAFE VALUE SET FUNCTION
+        function setValue(id, value) {
+            const el = document.getElementById(id);
+
+            if (el) {
+                el.value = value ?? '';
+            }
+        }
+
+        // AUTO FILL
+        setValue('entry_no', data.entry_no);
+        setValue('po', data.po);
+        setValue('issue_date', data.issue_date);
+        setValue('category', data.category);
+        setValue('sub_category', data.sub_category);
+        setValue('item', data.item);
+
+        // OPTIONAL FIELDS
+        setValue('challan_no', data.challan_no);
+        setValue('totalno', data.totalno);
+        setValue('rate', data.rate);
+        setValue('rackno', data.rackno);
+        setValue('receive_from', data.receive_from);
+        setValue('vehicle_no', data.vehicle_no);
+        setValue('receiver', data.receiver);
+
+        // IMPORTANT FIELDS
+        setValue('total_stock', data.total_stock);
+        setValue('remarks', data.remarks);
+            }
+            else {
+
+                console.log(data.error);
+
+            }
+        })
+
+        .catch(error => {
+            console.error(error);
+        })
+
+        .finally(() => {
+            fetchInProgress = false;
+        });
+}
 
     // ==================== CATEGORY → SUBCATEGORY AJAX ====================
     if (categorySelect) {

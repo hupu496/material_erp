@@ -354,8 +354,29 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="row g-4">
+                    <div class="col-ms-1">
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
+        <label class="form-check-label" for="switchCheckDefault">
+            Material in as per PO
+        </label>
+    </div>
+</div>
 
-                    <!-- Issue Date -->
+<div class="col-md-6">
+    <div class="floating-label">
+        <label>
+            <i class="far fa-calendar-alt me-1"></i>
+            PO No(optional)
+        </label>
+
+        <input name="po" type="text" id="poInput"
+               class="form-control-modern"
+               value=""
+               disabled>
+    </div>
+</div>
+
                     <div class="col-md-6">
                         <div class="floating-label">
                             <label><i class="far fa-calendar-alt me-1"></i> Issue Date <span class="text-danger">*</span></label>
@@ -364,7 +385,8 @@
                                    required>
                         </div>
                     </div>
-
+                    <!-- Issue Date -->
+                  
                     <!-- Entry No -->
                     <div class="col-md-6">
                         <div class="floating-label">
@@ -467,13 +489,20 @@
                     </div>
 
                     <!-- Remaining fields -->
-                    <div class="col-md-6">
-                        <div class="floating-label">
-                            <label><i class="fas fa-truck me-1"></i> Received From <span class="text-danger">*</span></label>
-                            <input name="receive_from" class="form-control-modern"
-                                   value="{% if instance %}{{ instance.receive_from }}{% endif %}" required>
-                        </div>
+                 <div class="col-md-6">
+                    <div class="floating-label">
+                        <label><i class="fas fa-truck me-1"></i> Received From <span class="text-danger">*</span></label>
+                        <select name="receive_from" id="receive_from" class="form-control-modern" required>
+                            <option value="">-- Select Party --</option>
+                            {% if instance and instance.receive_from %}
+                                <!-- Show selected party in edit mode -->
+                                <option value="{{ instance.receive_from.id }}" selected>
+                                    {{ instance.receive_from.name }}
+                                </option>
+                            {% endif %}
+                        </select>
                     </div>
+                </div>
 
                     <div class="col-md-6">
                         <div class="floating-label">
@@ -531,6 +560,7 @@
             <thead class="table-dark">
                 <tr>
                     <th>Date</th>
+                    <th>PO No</th>
                     <th>Entry No</th>
                     <th>Challan No</th>
                     <th>Item</th>
@@ -545,6 +575,11 @@
                 {% for receipt in receipts %}
                 <tr>
                     <td>{{ receipt.issue_date|date:'d-m-Y' }}</td>
+                    <td><strong> {% if receipt.po and receipt.po != '0' %}
+    #{{ receipt.po }}
+{% else %}
+    Not PO
+{% endif %}</strong></td>
                     <td><strong>#{{ receipt.entry_no }}</strong></td>
                     <td>{{ receipt.challan_no|default:'-' }}</td>
                     <td>
@@ -586,6 +621,23 @@
         </table>
     </div>
 </div>
+<script>
+    const switchCheck = document.getElementById('switchCheckDefault');
+    const poInput = document.getElementById('poInput');
+
+    switchCheck.addEventListener('change', function () {
+
+        if (this.checked) {
+            poInput.disabled = false;
+            poInput.required = true;
+        } else {
+            poInput.disabled = true;
+            poInput.required = false;
+            poInput.value = '';
+        }
+
+    });
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('receiptForm');
@@ -755,5 +807,76 @@ function resetForm() {
         showNotification('Form has been reset successfully', 'success');
     }
 }
+// ====================== Filter Parties by Category ======================
+document.getElementById("category").addEventListener("change", function() {
+    const categoryId = this.value;
+    const partySelect = document.getElementById("receive_from");
+
+    // Reset party dropdown
+    partySelect.innerHTML = '<option value="">-- Select Party --</option>';
+
+    if (!categoryId) return;
+
+    fetch(`/materials/load-parties/?category=${categoryId}`)
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(party => {
+                const option = document.createElement("option");
+                option.value = party.id;
+                option.textContent = party.name;
+                partySelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading parties:', error);
+            partySelect.innerHTML = '<option value="">Error loading parties</option>';
+        });
+});
+
+// For Edit Mode - Trigger category change to load parties
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById("category");
+    if (categorySelect && categorySelect.value) {
+        // Trigger change event to load parties for edit mode
+        const event = new Event('change');
+        categorySelect.dispatchEvent(event);
+    }
+});
+
+// ====================== Filter Parties by Category ======================
+document.getElementById("category").addEventListener("change", function() {
+    const categoryId = this.value;
+    const partySelect = document.getElementById("receive_from");
+
+    // Reset party dropdown
+    partySelect.innerHTML = '<option value="">-- Select Party --</option>';
+
+    if (!categoryId) return;
+
+    fetch(`/materials/load-parties/?category=${categoryId}`)
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(party => {
+                const option = document.createElement("option");
+                option.value = party.id;
+                option.textContent = party.name;
+                partySelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading parties:', error);
+            partySelect.innerHTML = '<option value="">Error loading parties</option>';
+        });
+});
+
+// For Edit Mode - Trigger category change to load parties
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById("category");
+    if (categorySelect && categorySelect.value) {
+        // Trigger change event to load parties for edit mode
+        const event = new Event('change');
+        categorySelect.dispatchEvent(event);
+    }
+});
 </script>
 {% endblock %}

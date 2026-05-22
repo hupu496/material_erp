@@ -32,6 +32,7 @@ class MaterialReceipt(models.Model):
     issue_date = models.DateField()
 
     entry_no = models.IntegerField()
+    po = models.CharField(max_length=50)
 
     challan_no = models.CharField(max_length=50)
 

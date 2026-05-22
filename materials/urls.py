@@ -7,6 +7,7 @@ urlpatterns = [
     path('master/<int:pk>/', views.material_master, name='material_master'),  # for edit
     path('material-delete/<int:pk>/', views.material_delete, name='material_delete'),
     path('load-subcategory/', views.load_subcategory, name='load_subcategory'),
+    path('load-parties/', views.load_parties_by_category, name='load_parties_by_category'),
     path('receipt/', views.material_receipt, name='material_receipt'),
     path('receipt/<int:pk>/', views.material_receipt, name='material_receipt'), # Edit
     path('receipt/delete/<int:pk>/', views.material_receipt_delete, name='material_receipt_delete'),
@@ -17,5 +18,6 @@ urlpatterns = [
     path('outward/<int:pk>/', views.material_outward, name='material_outward'),          # Edit
     path('outward/delete/<int:pk>/', views.material_outward_delete, name='material_outward_delete'),
     path('outward/fetch-receipt/', views.fetch_receipt_by_entry, name='fetch_receipt_by_entry'),
+   
 
 ]

@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from datetime import date
-from masters.models import Category, SubCategory, WorkSpots, UnitMaster
+from masters.models import Category, SubCategory, WorkSpots, UnitMaster,PartyMaster
 from .models import MaterialMaster,MaterialReceipt,MaterialRequisition,MaterialOutward
 import base64
 from django.core.files.base import ContentFile
@@ -93,6 +93,7 @@ def material_receipt(request, pk=None):
             total_stock = float(request.POST.get('total_stock') or 0)
 
             data = {
+                'po':request.POST.get('po'),
                 'issue_date': request.POST.get('issue_date'),
                 'entry_no': int(request.POST.get('entry_no') or 0),
                 'challan_no': request.POST.get('challan_no') or '',
@@ -102,14 +103,14 @@ def material_receipt(request, pk=None):
                 'totalno': totalno,
                 'rate': rate,
                 'rackno': request.POST.get('rackno') or '',
-                'total_stock': int(total_stock),           # Change to DecimalField later if needed
+                'total_stock': int(total_stock), # Change to DecimalField later if needed
                 'receive_from': request.POST.get('receive_from') or '',
                 'vehicle_no': request.POST.get('vehicle_no') or '',
                 'receiver': request.POST.get('receiver') or '',
                 'remarks': request.POST.get('remarks') or '',
             }
 
-            if instance:  # Edit
+            if instance:
                 for key, value in data.items():
                     setattr(instance, key, value)
                 instance.save()
@@ -124,6 +125,7 @@ def material_receipt(request, pk=None):
     # GET - Show form + list
     categories = Category.objects.all()
     subcategories = SubCategory.objects.all()
+    
     materials = MaterialMaster.objects.select_related('category').all()
 
     receipts = MaterialReceipt.objects.select_related(
@@ -139,7 +141,21 @@ def material_receipt(request, pk=None):
         'is_edit': bool(instance),
         'today': date.today(),
     })
+def load_parties_by_category(request):
+    category_id = request.GET.get('category')
+    if not category_id:
+        return JsonResponse([], safe=False)
 
+    parties = PartyMaster.objects.filter(category_id=category_id).order_by('name')
+    
+    data = []
+    for party in parties:
+        data.append({
+            'id': party.id,
+            'name': party.name
+        })
+    
+    return JsonResponse(data, safe=False)
 
 # ====================== DELETE VIEW ======================
 def material_receipt_delete(request, pk):
@@ -158,6 +174,7 @@ def material_requisition(request, pk=None):
         try:
             data = {
                 'issue_date': request.POST.get('issue_date'),
+                'po':request.POST.get('po'),
                 'entry_no': int(request.POST.get('entry_no') or 0),
                 'requisition_no': request.POST.get('requisition_no') or '',
                 'category_id': request.POST.get('category'),
@@ -263,17 +280,45 @@ def material_outward(request, pk=None):
 # AJAX: Fetch data from MaterialReceipt using entry_no
 def fetch_receipt_by_entry(request):
     entry_no = request.GET.get('entry_no')
-    if not entry_no:
+    po = request.GET.get('po')
+    if not entry_no or po   :
         return JsonResponse({'error': 'No entry_no provided'}, status=400)
 
     try:
-        receipt = MaterialReceipt.objects.get(entry_no=entry_no)
+        receipt = None
+
+        # SEARCH USING ENTRY NO
+        if entry_no:
+            receipt = MaterialReceipt.objects.filter(
+                entry_no=entry_no
+            ).first()
+
+        # SEARCH USING PO
+        elif po:
+            receipt = MaterialReceipt.objects.filter(
+                po__iexact=po
+            ).first()
+        if not receipt:
+            return JsonResponse({
+                'success': False,
+                'error': 'No receipt found'
+            })
         data = {
             'success': True,
+            'issue_date':receipt.issue_date,
+            'entry_no':receipt.entry_no,
+            'po':receipt.po,
+            'challan_no':receipt.challan_no,
             'totalno': receipt.totalno,
             'description': receipt.item.description if receipt.item else '',
-            'category': receipt.category.name if receipt.category else '',
-            'sub_category': receipt.sub_category.sub_category if receipt.sub_category else '',
+            'category': receipt.category.id if receipt.category else '',
+            'sub_category': receipt.sub_category.id if receipt.sub_category else '',
+            'item':receipt.item.id if receipt.item else '',
+            'total_stock':receipt.total_stock,
+            'receive_from':receipt.receive_from,
+            'vehicle_no':receipt.vehicle_no,
+            'receiver':receipt.receiver,
+            'remarks':receipt.remarks,
             'rate': receipt.rate,
             'rackno': receipt.rackno,
         }
@@ -290,3 +335,4 @@ def material_outward_delete(request, pk):
     if request.method == "POST":
         outward.delete()
     return redirect('material_outward')
+# report

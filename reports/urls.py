@@ -7,5 +7,6 @@ urlpatterns = [
     path('master/', views.master_report, name='master_report'),
     path('stock/', views.stock_summary, name='stock_summary'),
     path('returnable/', views.returnable_report, name='returnable_report'),
+     
 
 ]
