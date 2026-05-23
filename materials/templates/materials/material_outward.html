@@ -632,6 +632,20 @@
 
             <div class="row g-4">
                 <!-- Entry No - Auto Fetch -->
+                 <div class="col-md-6">
+                    <div class="floating-label">
+                        <label>
+                            <i class="fas fa-hashtag me-2"></i> PO NUMBER
+                            <span class="text-danger">(Optional)</span>
+                        </label>
+
+                        <input id="po"
+                            name="po"
+                            type="text"
+                            class="form-control-modern"
+                            value="{% if instance %}{{ instance.po }}{% endif %}">
+                    </div>
+                </div>
                 <div class="col-md-6">
                     <div class="floating-label">
                         <label><i class="fas fa-hashtag me-2"></i> Entry No (From Receipt) <span class="text-danger">*</span></label>
@@ -649,7 +663,7 @@
                 <div class="col-md-6">
                     <div class="floating-label">
                         <label><i class="far fa-calendar-alt me-2"></i> Issue Date <span class="text-danger">*</span></label>
-                        <input name="issue_date" type="date" class="form-control-modern"
+                        <input id="issue_date" name="issue_date" type="date" class="form-control-modern"
                                value="{% if instance %}{{ instance.issue_date|date:'Y-m-d' }}{% else %}{{ today|date:'Y-m-d' }}{% endif %}" 
                                required data-tooltip="Select the date of material issue">
                     </div>
@@ -773,7 +787,7 @@
                 <div class="col-md-12">
                     <div class="floating-label">
                         <label><i class="fas fa-pen-alt me-2"></i> Remarks</label>
-                        <textarea name="remarks" rows="3" class="form-control-modern" 
+                        <textarea name="remarks" id="remarks" rows="3" class="form-control-modern" 
                                   data-tooltip="Additional notes" placeholder="Enter any additional notes or comments...">{% if instance %}{{ instance.remarks }}{% endif %}</textarea>
                     </div>
                 </div>
@@ -863,6 +877,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const entryNoInput = document.getElementById('entry_no');
     const totalNoInput = document.getElementById('totalno');
     const descriptionInput = document.getElementById('description');
+    const remarksField = document.getElementById('remarks');
+    const issue_date = document.getElementById('issue_date');
+    const poInput = document.getElementById('po');
     
     let fetchInProgress = false;
 
@@ -904,6 +921,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (data.success) {
                         totalNoInput.value = data.totalno || '';
                         descriptionInput.value = data.description || '';
+                        remarksField.value = data.remarks || '';
+                        issue_date.value = data.issue_date || '';
+                        poInput.value = data.po || '';
                         showNotification(`✅ Data fetched successfully!\nTotal Nos: ${data.totalno}`, 'success');
                         
                         // Visual feedback for auto-filled fields
@@ -934,7 +954,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         }
     }
+     if (poInput) {
+     let debounceTimer;
+    poInput.addEventListener('input', function () {
 
+        clearTimeout(debounceTimer);
+
+        const po = this.value.trim();
+
+        if (!po) return;
+
+        debounceTimer = setTimeout(() => {
+            fetchReceiptDetails({
+                po: po
+            });
+        }, 500);
+    });
+}
     // ==================== FORM VALIDATION ====================
     function validateForm() {
         let isValid = true;

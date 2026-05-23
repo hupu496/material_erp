@@ -281,8 +281,8 @@ def material_outward(request, pk=None):
 def fetch_receipt_by_entry(request):
     entry_no = request.GET.get('entry_no')
     po = request.GET.get('po')
-    if not entry_no or po   :
-        return JsonResponse({'error': 'No entry_no provided'}, status=400)
+    if not entry_no and not po:
+        return JsonResponse({'error': 'entry_no or po required'}, status=400)
 
     try:
         receipt = None
