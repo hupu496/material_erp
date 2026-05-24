@@ -722,17 +722,23 @@
                 <div class="col-md-6">
                     <div class="floating-label">
                         <label><i class="fas fa-store me-2"></i> Vendor</label>
-                        <input name="vendor" class="form-control-modern"
-                               value="{% if instance %}{{ instance.vendor }}{% endif %}"
-                               data-tooltip="Vendor name" placeholder="Enter vendor name">
+                         <select id="vendor" name="vendor" class="form-control-modern" required>
+                            <option value="">-- Select Party --</option>
+                            {% if instance and instance.vendor %}
+                                <!-- Show selected party in edit mode -->
+                                <option value="{{ instance.vendor.id }}" selected>
+                                    {{ instance.vendor.name }}
+                                </option>
+                            {% endif %}
+                        </select>
+                      
                     </div>
                 </div>
-
                 <!-- Issued To -->
                 <div class="col-md-6">
                     <div class="floating-label">
                         <label><i class="fas fa-user me-2"></i> Issued To <span class="text-danger">*</span></label>
-                        <input name="issuedto" class="form-control-modern"
+                        <input  id ="issuedto"name="issuedto" class="form-control-modern"
                                value="{% if instance %}{{ instance.issuedto }}{% endif %}"
                                required data-tooltip="Person/Department receiving material" placeholder="Enter recipient name">
                     </div>
@@ -742,12 +748,11 @@
                 <div class="col-md-6">
                     <div class="floating-label">
                         <label><i class="fas fa-truck me-2"></i> Vehicle No</label>
-                        <input name="vehicleno" class="form-control-modern"
-                               value="{% if instance %}{{ instance.vehicleno }}{% endif %}"
+                        <input id="vehicleno" name="vehicleno" class="form-control-modern"
+                               value="{% if instance %}{{ instance.vehicle_no }}{% endif %}"
                                data-tooltip="Vehicle registration number" placeholder="Enter vehicle number">
                     </div>
                 </div>
-
                 <!-- Purpose -->
                 <div class="col-md-12">
                     <div class="floating-label">
@@ -757,12 +762,11 @@
                                data-tooltip="Purpose of material issue" placeholder="Enter purpose">
                     </div>
                 </div>
-
                 <!-- Issuer -->
                 <div class="col-md-6">
                     <div class="floating-label">
                         <label><i class="fas fa-user-check me-2"></i> Issuer</label>
-                        <input name="issuer" class="form-control-modern"
+                        <input id="issuer" name="issuer" class="form-control-modern"
                                value="{% if instance %}{{ instance.issuer }}{% endif %}"
                                data-tooltip="Person issuing material" placeholder="Enter issuer name">
                     </div>
@@ -880,97 +884,177 @@ document.addEventListener('DOMContentLoaded', function() {
     const remarksField = document.getElementById('remarks');
     const issue_date = document.getElementById('issue_date');
     const poInput = document.getElementById('po');
+    const vehicleNo = document.getElementById('vehicleno');
+    const issuedto =document.getElementById('issuedto')
+    const vendor = document.getElementById('vendor');
+    
     
     let fetchInProgress = false;
 
     // ==================== ENTRY NO AUTO-FETCH ====================
     if (entryNoInput) {
-        let debounceTimer;
-        
-        entryNoInput.addEventListener('input', function() {
-            clearTimeout(debounceTimer);
-            const entryNo = this.value.trim();
-            
-            if (!entryNo) return;
-            
-            debounceTimer = setTimeout(() => {
-                fetchReceiptDetails(entryNo);
-            }, 500);
-        });
-        
-        entryNoInput.addEventListener('blur', function() {
-            const entryNo = this.value.trim();
-            if (entryNo && !fetchInProgress) {
-                fetchReceiptDetails(entryNo);
-            }
-        });
-        
-        function fetchReceiptDetails(entryNo) {
-            if (fetchInProgress) return;
-            
-            fetchInProgress = true;
-            
-            // Add loading indicator
-            const loadingIndicator = document.createElement('span');
-            loadingIndicator.className = 'loading-indicator';
-            entryNoInput.parentElement.appendChild(loadingIndicator);
-            
-            fetch(`/materials/outward/fetch-receipt/?entry_no=${entryNo}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        totalNoInput.value = data.totalno || '';
-                        descriptionInput.value = data.description || '';
-                        remarksField.value = data.remarks || '';
-                        issue_date.value = data.issue_date || '';
-                        poInput.value = data.po || '';
-                        showNotification(`✅ Data fetched successfully!\nTotal Nos: ${data.totalno}`, 'success');
-                        
-                        // Visual feedback for auto-filled fields
-                        [totalNoInput, descriptionInput].forEach(field => {
-                            if (field) {
-                                field.style.background = 'linear-gradient(135deg, #f0f9ff, #e6f7ff)';
-                                field.style.transform = 'scale(1.02)';
-                                setTimeout(() => {
-                                    field.style.background = '';
-                                    field.style.transform = '';
-                                }, 500);
-                            }
-                        });
-                    } else {
-                        showNotification(`❌ ${data.error || 'No receipt found for this entry number'}`, 'error');
-                        totalNoInput.value = '';
-                        descriptionInput.value = '';
-                    }
-                })
-                .catch(err => {
-                    console.error('Error fetching receipt:', err);
-                    showNotification('❌ Error connecting to server', 'error');
-                })
-                .finally(() => {
-                    fetchInProgress = false;
-                    const indicator = entryNoInput.parentElement.querySelector('.loading-indicator');
-                    if (indicator) indicator.remove();
-                });
-        }
-    }
-     if (poInput) {
-     let debounceTimer;
-    poInput.addEventListener('input', function () {
+    let debounceTimer;
 
+    entryNoInput.addEventListener('input', function () {
         clearTimeout(debounceTimer);
+
+        const entryNo = this.value.trim();
+
+        if (!entryNo) return;
+
+        debounceTimer = setTimeout(() => {
+            fetchReceiptDetails('entry_no', entryNo);
+        }, 500);
+    });
+
+    entryNoInput.addEventListener('blur', function () {
+        const entryNo = this.value.trim();
+
+        if (entryNo && !fetchInProgress) {
+            fetchReceiptDetails('entry_no', entryNo);
+        }
+    });
+}
+
+// ================= PO FETCH =================
+if (poInput) {
+    let poDebounceTimer;
+
+    poInput.addEventListener('input', function () {
+        clearTimeout(poDebounceTimer);
 
         const po = this.value.trim();
 
         if (!po) return;
 
-        debounceTimer = setTimeout(() => {
-            fetchReceiptDetails({
-                po: po
-            });
+        poDebounceTimer = setTimeout(() => {
+            fetchReceiptDetails('po', po);
         }, 500);
     });
+
+    poInput.addEventListener('blur', function () {
+        const po = this.value.trim();
+
+        if (po && !fetchInProgress) {
+            fetchReceiptDetails('po', po);
+        }
+    });
 }
+
+// ================= COMMON FETCH FUNCTION =================
+function fetchReceiptDetails(type, value) {
+
+    if (fetchInProgress) return;
+
+    fetchInProgress = true;
+
+    const targetInput = type === 'entry_no' ? entryNoInput : poInput;
+
+    // Loading Indicator
+    const loadingIndicator = document.createElement('span');
+    loadingIndicator.className = 'loading-indicator';
+
+    targetInput.parentElement.appendChild(loadingIndicator);
+
+    fetch(`/materials/outward/fetch-receipt/?${type}=${encodeURIComponent(value)}`)
+        .then(response => response.json())
+        .then(data => {
+
+            if (data.success) {
+                console.log(data)
+
+                entryNoInput.value = data.entry_no || '';
+                totalNoInput.value = data.totalno || '';
+                descriptionInput.value = data.description || '';
+                remarksField.value = data.remarks || '';
+                issue_date.value = data.issue_date || '';
+                poInput.value = data.po || '';
+                vehicleNo.value = data.vehicle_no || '';
+                issuedto.value = data.receive_from_name || '';
+                vendor.innerHTML = '<option value="">-- Select Party --</option>';
+
+if (data.parties && data.parties.length > 0) {
+
+    data.parties.forEach(function(party) {
+
+        const option = document.createElement('option');
+
+        option.value = party.id;
+        option.textContent = party.name;
+
+        if (party.selected) {
+            option.selected = true;
+        }
+
+        vendor.appendChild(option);
+    });
+}
+
+                showNotification(
+                    `✅ Data fetched successfully!\nTotal Nos: ${data.totalno}`,
+                    'success'
+                );
+
+                // Highlight auto-filled fields
+                [
+                    entryNoInput,
+                    totalNoInput,
+                    descriptionInput,
+                    remarksField,
+                    issue_date,
+                    poInput,
+                    vehicleNo,
+                    issuedto,
+                    vendor,
+                ].forEach(field => {
+
+                    if (field) {
+
+                        field.style.background =
+                            'linear-gradient(135deg, #f0f9ff, #e6f7ff)';
+
+                        field.style.transform = 'scale(1.02)';
+
+                        setTimeout(() => {
+                            field.style.background = '';
+                            field.style.transform = '';
+                        }, 500);
+                    }
+                });
+
+            } else {
+
+                showNotification(
+                    `❌ ${data.error || 'No receipt found'}`,
+                    'error'
+                );
+
+                totalNoInput.value = '';
+                descriptionInput.value = '';
+                remarksField.value = '';
+                issue_date.value = '';
+            }
+        })
+        .catch(err => {
+
+            console.error('Error fetching receipt:', err);
+
+            showNotification(
+                '❌ Error connecting to server',
+                'error'
+            );
+        })
+        .finally(() => {
+
+            fetchInProgress = false;
+
+            const indicator =
+                targetInput.parentElement.querySelector('.loading-indicator');
+
+            if (indicator) indicator.remove();
+        });
+}
+    
     // ==================== FORM VALIDATION ====================
     function validateForm() {
         let isValid = true;

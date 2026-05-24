@@ -61,6 +61,7 @@ class MaterialReceipt(models.Model):
 class MaterialRequisition(models.Model):
 
     issue_date = models.DateField()
+    po = models.CharField(max_length=50)
 
     entry_no = models.IntegerField()
 
@@ -83,6 +84,7 @@ class MaterialRequisition(models.Model):
 class MaterialOutward(models.Model):
 
     issue_date = models.DateField()
+    po = models.CharField(max_length=50)
 
     entry_no = models.IntegerField()
 

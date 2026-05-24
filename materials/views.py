@@ -239,6 +239,7 @@ def material_outward(request, pk=None):
             data = {
                 'issue_date': request.POST.get('issue_date'),
                 'entry_no': int(request.POST.get('entry_no') or 0),
+                'po': int(request.POST.get('po') or 0),
                 'location': request.POST.get('location') or '',
                 'contents': request.POST.get('contents') or '',
                 'contents2': request.POST.get('contents2') or '',
@@ -268,11 +269,19 @@ def material_outward(request, pk=None):
 
     # GET Request - Form + List
     outward_list = MaterialOutward.objects.order_by('-issue_date')
-
+    parties = PartyMaster.objects.all()
+    
+    data = []
+    for party in parties:
+        data.append({
+            'id': party.id,
+            'name': party.name
+        })
     return render(request, 'materials/material_outward.html', {
         'outward_list': outward_list,
         'instance': instance,
         'is_edit': bool(instance),
+        'data':data,
         'today': date.today(),
     })
 
@@ -281,8 +290,11 @@ def material_outward(request, pk=None):
 def fetch_receipt_by_entry(request):
     entry_no = request.GET.get('entry_no')
     po = request.GET.get('po')
+
     if not entry_no and not po:
-        return JsonResponse({'error': 'entry_no or po required'}, status=400)
+        return JsonResponse({
+            'error': 'entry_no or po required'
+        }, status=400)
 
     try:
         receipt = None
@@ -298,35 +310,81 @@ def fetch_receipt_by_entry(request):
             receipt = MaterialReceipt.objects.filter(
                 po__iexact=po
             ).first()
+
         if not receipt:
             return JsonResponse({
                 'success': False,
                 'error': 'No receipt found'
             })
+
+        # selected party
+        selected_party = None
+
+        if receipt.receive_from:
+            selected_party = PartyMaster.objects.filter(
+                id=receipt.receive_from
+            ).first()
+
+        # remaining parties except selected
+        parties = PartyMaster.objects.exclude(
+            id=receipt.receive_from
+        ).order_by('name')
+
+        party_list = []
+
+        # selected first
+        if selected_party:
+            party_list.append({
+                'id': selected_party.id,
+                'name': selected_party.name,
+                'selected': True
+            })
+
+        # remaining list
+        for p in parties:
+            party_list.append({
+                'id': p.id,
+                'name': p.name,
+                'selected': False
+            })
+
         data = {
             'success': True,
-            'issue_date':receipt.issue_date,
-            'entry_no':receipt.entry_no,
-            'po':receipt.po,
-            'challan_no':receipt.challan_no,
+
+            'issue_date': receipt.issue_date,
+            'entry_no': receipt.entry_no,
+            'po': receipt.po,
+            'challan_no': receipt.challan_no,
             'totalno': receipt.totalno,
+
             'description': receipt.item.description if receipt.item else '',
+
             'category': receipt.category.id if receipt.category else '',
             'sub_category': receipt.sub_category.id if receipt.sub_category else '',
-            'item':receipt.item.id if receipt.item else '',
-            'total_stock':receipt.total_stock,
-            'receive_from':receipt.receive_from,
-            'vehicle_no':receipt.vehicle_no,
-            'receiver':receipt.receiver,
-            'remarks':receipt.remarks,
+            'item': receipt.item.id if receipt.item else '',
+
+            'total_stock': receipt.total_stock,
+
+            'receive_from': receipt.receive_from,
+            'receive_from_name': selected_party.name if selected_party else '',
+
+            'vehicle_no': receipt.vehicle_no,
+            'receiver': receipt.receiver,
+            'remarks': receipt.remarks,
             'rate': receipt.rate,
             'rackno': receipt.rackno,
+
+            # vendor dropdown list
+            'parties': party_list,
         }
+
         return JsonResponse(data)
-    except MaterialReceipt.DoesNotExist:
-        return JsonResponse({'success': False, 'error': 'No receipt found with this Entry No'})
+
     except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
 
 
 # Delete View

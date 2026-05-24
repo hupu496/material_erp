@@ -821,10 +821,12 @@ document.getElementById("category").addEventListener("change", function() {
         .then(response => response.json())
         .then(data => {
             data.forEach(party => {
+               
                 const option = document.createElement("option");
                 option.value = party.id;
                 option.textContent = party.name;
                 partySelect.appendChild(option);
+                console.log(option)
             });
         })
         .catch(error => {
