@@ -29,6 +29,11 @@ class MaterialMaster(models.Model):
     status = models.BooleanField(default=True)
 class MaterialReceipt(models.Model):
 
+    LEDGER_TYPE_CHOICES = [
+        ('receipt_ledger', 'Receipt Ledger'),
+        ('return_inward', 'Return Inward'),
+    ]
+
     issue_date = models.DateField()
 
     entry_no = models.IntegerField()
@@ -58,7 +63,18 @@ class MaterialReceipt(models.Model):
 
     remarks = models.TextField()
 
+    ledger_type = models.CharField(
+        max_length=50,
+        choices=LEDGER_TYPE_CHOICES,
+        default='receipt_ledger',
+    )
+
 class MaterialRequisition(models.Model):
+
+    LEDGER_TYPE_CHOICES = [
+        ('issue_ledger', 'Issue Ledger'),
+        ('return_outward', 'Return Outward'),
+    ]
 
     issue_date = models.DateField()
     po = models.CharField(max_length=50)
@@ -80,6 +96,12 @@ class MaterialRequisition(models.Model):
     requisition_by = models.CharField(max_length=100)
 
     remarks = models.TextField()
+
+    ledger_type = models.CharField(
+        max_length=50,
+        choices=LEDGER_TYPE_CHOICES,
+        default='issue_ledger',
+    )
 
 class MaterialOutward(models.Model):
 

@@ -1,0 +1,452 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Material Receipt Ledger</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 1.5cm;
+        }
+        body {
+            font-family: 'DejaVu Sans', 'Arial', sans-serif;
+            font-size: 9px;
+            color: #333;
+            line-height: 1.3;
+        }
+        .container {
+            width: 100%;
+        }
+        /* Header Section */
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .logo {
+            max-width: 80px;
+            height: auto;
+            margin-bottom: 5px;
+        }
+        .company-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #003366;
+            margin: 0;
+        }
+        .plant-name {
+            font-size: 14px;
+            font-weight: bold;
+            margin: 3px 0;
+        }
+        .report-title {
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: underline;
+            margin: 5px 0;
+        }
+        .period {
+            font-size: 10px;
+            font-style: italic;
+            margin: 2px 0;
+        }
+        /* Table Styles */
+        .ledger-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 8px;
+        }
+        .ledger-table th,
+        .ledger-table td {
+            border: 1px solid #000;
+            padding: 5px 3px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .ledger-table th {
+            background-color: #e6e6e6;
+            font-weight: bold;
+            font-size: 8.5px;
+            padding: 6px 3px;
+        }
+        .ledger-table td {
+            word-break: break-word;
+        }
+        /* Footer Section */
+        .footer {
+            margin-top: 20px;
+            font-size: 8px;
+        }
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 10px;
+        }
+        .signature-line {
+            text-align: center;
+            width: 200px;
+        }
+        .signature-line .line {
+            border-top: 1px solid #000;
+            margin-top: 30px;
+            padding-top: 5px;
+        }
+        .total-row {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        .text-left {
+            text-align: left;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+         table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        th,td{
+            border:1px solid #000;
+            padding:8px;
+            font-size:12px;
+        }
+
+        th{
+            background:#ddd;
+        }
+
+        .header{
+            text-align:center;
+            margin-bottom:20px;
+        }
+
+        .download-btn{
+            padding:10px 20px;
+            background:#003366;
+            color:white;
+            border:none;
+            cursor:pointer;
+            margin-bottom:20px;
+        }
+
+        @media print {
+
+            .download-btn{
+                display:none;
+            }
+
+        }
+        .main-header{
+
+    width:100%;
+    border:1px solid #000;
+    margin-bottom:12px;
+
+}
+
+/* ================= TOP HEADER ================= */
+
+.top-header{
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:8px 10px;
+    border-bottom:1px solid #000;
+
+}
+
+/* ================= LEFT ================= */
+
+.header-left{
+
+    width:15%;
+    text-align:left;
+
+}
+
+.company-logo{
+
+    width:70px;
+    height:auto;
+
+}
+
+/* ================= CENTER ================= */
+
+.header-center{
+
+    width:70%;
+    text-align:center;
+
+}
+
+.company-title{
+
+    font-size:18px;
+    font-weight:bold;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+
+}
+
+.location-name{
+
+    font-size:13px;
+    margin-top:2px;
+    font-weight:500;
+
+}
+
+.report-heading{
+
+    font-size:15px;
+    font-weight:bold;
+    margin-top:4px;
+    text-transform:uppercase;
+    text-decoration:underline;
+
+}
+
+/* ================= RIGHT ================= */
+
+.header-right{
+
+    width:15%;
+    text-align:right;
+    font-size:11px;
+
+}
+
+.date-box{
+
+    font-weight:bold;
+
+}
+
+/* ================= SECOND ROW ================= */
+
+.sub-header-row{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:6px 10px;
+    font-size:11px;
+    background:#f2f2f2;
+
+}
+
+.sub-left{
+
+    width:35%;
+    text-align:left;
+
+}
+
+.sub-center{
+
+    width:30%;
+    text-align:center;
+
+}
+
+.sub-right{
+
+    width:35%;
+    text-align:right;
+
+}
+    </style>
+</head>
+<body>
+
+</div>
+
+<button onclick="downloadPDF()" class="download-btn">
+
+    Download PDF
+
+</button>
+{% load static %}
+    <div class="container">
+        <!-- Header Section with Logo placeholder -->
+      <div class="main-header">
+
+    <!-- TOP ROW -->
+
+    <div class="top-header">
+
+        <!-- LEFT LOGO -->
+
+        <div class="header-left">
+
+            <img src="{% static 'images/images.png' %}"
+                 class="company-logo">
+
+        </div>
+
+        <!-- CENTER DETAILS -->
+
+        <div class="header-center">
+
+            <div class="company-title">
+                INDIAN OIL CORPORATION LTD.
+            </div>
+
+            <div class="location-name">
+                UNA Bottling Plant
+            </div>
+
+            <div class="report-heading">
+                MATERIAL RECEIPT LEDGER
+            </div>
+
+        </div>
+
+        <!-- RIGHT DATE -->
+
+        <div class="header-right">
+
+            <div class="date-box">
+                Date :
+                {{ generated_on|date:"d/m/Y" }}
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- SECOND ROW -->
+
+    <div class="sub-header-row">
+
+        <div class="sub-left">
+
+            <strong>Period :</strong>
+
+            {{ from_date|default:"All" }}
+
+            to
+
+            {{ to_date|default:"All" }}
+
+        </div>
+
+        <div class="sub-center">
+
+            <strong>Plant :</strong>
+
+            {{ plant_name }}
+
+        </div>
+
+        <div class="sub-right">
+
+            <strong>Generated By :</strong>
+
+            {{ generated_by }}
+
+        </div>
+
+    </div>
+
+</div>
+
+
+        <!-- Main Data Table -->
+        <table class="ledger-table">
+            <thead>
+                <tr>
+                    <th>Sl.No</th>
+                    <th>Date</th>
+                    <th>Entry No</th>
+                    <th>Challan No</th>
+                    <th>Category</th>
+                    <th>Item</th>
+                    <th>Opening Qty</th>
+                    <th>In Use Qty</th>
+                    <th>Unit</th>
+                    <th>Vendor</th>
+                    <th>Vehicle</th>
+                    <th>Receiver</th>
+                    <th>Received by</th>
+                    <th>Receipt Qty</th>
+                    <th>Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in report_data %}
+                <tr>
+                    <td>{{ row.sl_no }}</td>
+                    <td>{{ row.date }}</td>
+                    <td>{{ row.entry_no }}</td>
+                    <td>{{ row.challan_no }}</td>
+                    <td>{{ row.category }}</td>
+                    <td style="text-align:left;">{{ row.item }}</td>
+                    <td>{{ row.opening_qty }}</td>
+                    <td>{{ row.in_use_qty }}</td>
+                    <td>{{ row.unit }}</td>
+                    <td style="text-align:left;">{{ row.vendor }}</td>
+                    <td>{{ row.vehicle }}</td>
+                    <td>{{ row.receiver }}</td>
+                    <td>{{ row.received_by }}</td>
+                    <td><strong>{{ row.receipt_qty }}</strong></td>
+                    <td style="text-align:left;">{{ row.remarks }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="15" style="text-align:center;">No records found for the selected period.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                {% if report_data %}
+                <tr class="total-row">
+                    <td colspan="13" style="text-align:right; font-weight:bold;">Total Receipt Qty:</td>
+                    <td style="font-weight:bold;">{{ total_receipt_qty }}</td>
+                    <td></td>
+                </tr>
+                {% endif %}
+            </tfoot>
+        </table>
+
+        <!-- Footer with Signatures and Meta -->
+        <div class="footer">
+            <div class="signatures">
+                <div class="signature-line">
+                    <div class="line"></div>
+                    <div>Store Keeper</div>
+                </div>
+                <div class="signature-line">
+                    <div class="line"></div>
+                    <div>Accounts Officer</div>
+                </div>
+                <div class="signature-line">
+                    <div class="line"></div>
+                    <div>Plant Manager</div>
+                </div>
+            </div>
+            <div class="text-right" style="margin-top:15px;">
+                Generated on: {{ generated_on }} | By: {{ generated_by }}
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+
+function downloadPDF(){
+
+    window.print();
+
+}
+
+</script>
+</html>

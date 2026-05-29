@@ -1,0 +1,678 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<style>
+    <style>
+    /* Form Container */
+    .report-form-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    /* Card Style */
+    .form-card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1.5rem 2rem;
+        color: white;
+    }
+    
+    .form-header h3 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .form-header h3 i {
+        font-size: 1.8rem;
+    }
+    
+    .form-header p {
+        margin: 0.5rem 0 0;
+        opacity: 0.9;
+        font-size: 0.9rem;
+    }
+    
+    .form-body {
+        padding: 2rem;
+    }
+    
+    /* Radio Group */
+    .ledger-type-group {
+        background: #f8f9fa;
+        border-radius: 16px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .ledger-type-group label {
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+        display: block;
+    }
+    
+    .radio-options {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .radio-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        padding: 8px 16px;
+        border-radius: 40px;
+        transition: all 0.3s ease;
+        background: white;
+        border: 2px solid #e0e0e0;
+    }
+    
+    .radio-option:hover {
+        border-color: #667eea;
+        background: #f0f4ff;
+    }
+    
+    .radio-option input[type="radio"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #667eea;
+    }
+    
+    .radio-option span {
+        font-size: 0.95rem;
+        color: #333;
+    }
+    
+    /* Date Range Group */
+    .date-range-group {
+        background: #f8f9fa;
+        border-radius: 16px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .date-range-group label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+    
+    .date-inputs {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .date-input {
+        flex: 1;
+        min-width: 200px;
+    }
+    
+    .date-input label {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #666;
+        margin-bottom: 0.25rem;
+    }
+    
+    .date-input input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .date-input input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    /* Category Select */
+    .category-group {
+        background: #f8f9fa;
+        border-radius: 16px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .category-group label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+    
+    .category-group select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .category-group select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    /* File Type Group */
+    .filetype-group {
+        background: #f8f9fa;
+        border-radius: 16px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .filetype-group label {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+    
+    .filetype-options {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .filetype-card {
+        flex: 1;
+        min-width: 120px;
+        padding: 1rem;
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 16px;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .filetype-card:hover {
+        border-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .filetype-card.selected {
+        border-color: #667eea;
+        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+    }
+    
+    .filetype-card input {
+        display: none;
+    }
+    
+    .filetype-card i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .filetype-card .filetype-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #333;
+    }
+    
+    .filetype-card .filetype-desc {
+        font-size: 0.7rem;
+        color: #999;
+        margin-top: 4px;
+    }
+    
+    /* Colors for file types */
+    .filetype-card.csv i { color: #2ecc71; }
+    .filetype-card.xlsx i { color: #27ae60; }
+    .filetype-card.pdf i { color: #e74c3c; }
+    
+    /* Submit Button */
+    .submit-section {
+        margin-top: 2rem;
+        text-align: center;
+    }
+    
+    .btn-generate {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 14px 40px;
+        border-radius: 40px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-generate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-generate:active {
+        transform: translateY(0);
+    }
+    
+    /* Info Section */
+    .info-section {
+        margin-top: 2rem;
+        background: #f0f4ff;
+        border-radius: 16px;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    
+    .info-section i {
+        font-size: 1.2rem;
+        color: #667eea;
+    }
+    
+    .info-section span {
+        font-size: 0.85rem;
+        color: #555;
+    }
+    
+    /* Loading Overlay */
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .loading-overlay.active {
+        display: flex;
+    }
+    
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .loading-overlay p {
+        color: white;
+        font-size: 1rem;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .form-body {
+            padding: 1.5rem;
+        }
+        
+        .date-inputs {
+            flex-direction: column;
+        }
+        
+        .date-input {
+            min-width: auto;
+        }
+        
+        .filetype-options {
+            flex-direction: column;
+        }
+        
+        .filetype-card {
+            min-width: auto;
+        }
+    }
+</style>
+<!-- <form method="POST">
+    {% csrf_token %}
+
+    <div>
+        <label>
+            <input type="radio" name="ledger_type" value="receipt" required>
+            Receipt Ledger
+        </label>
+
+        <label>
+            <input type="radio" name="ledger_type" value="requisition">
+            Requisition Ledger
+        </label>
+    </div>
+
+    <br>
+
+    <div>
+        <label>From Date</label>
+        <input type="date" name="from_date">
+
+        <label>To Date</label>
+        <input type="date" name="to_date">
+    </div>
+
+    <br>
+
+    <div>
+        <label>Category</label>
+
+        <select name="category">
+            <option value="">All Category</option>
+
+            {% for cat in categories %}
+                <option value="{{ cat.id }}">
+                    {{ cat.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <br>
+
+    <div>
+        <label>File Type</label>
+
+        <select name="file_type" class="form-control">
+            <option value="csv">CSV</option>
+            <option value="xlsx">Excel</option>
+            <option value="pdf">PDF (Print Ready)</option>
+        </select>
+    </div>
+
+    <br>
+
+    <button type="submit">
+        Generate Report
+    </button>
+
+</form> -->
+<div class="report-form-container">
+    <div class="form-card">
+        <div class="form-header">
+            <h3>
+                <i class="fas fa-chart-line"></i>
+                Date Wise Ledger Report
+            </h3>
+            <p>Generate detailed reports for material receipts and requisitions with customizable filters</p>
+        </div>
+        
+        <div class="form-body">
+            <form method="POST" id="reportForm">
+                {% csrf_token %}
+                
+                <!-- Ledger Type Selection -->
+                <div class="ledger-type-group">
+                    <label>Select Ledger Type</label>
+                    <div class="radio-options">
+                        <label class="radio-option">
+                            <input type="radio" name="ledger_type" value="receipt" required>
+                            <span><i class="fas fa-download"></i> Receipt Ledger</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="ledger_type" value="requisition">
+                            <span><i class="fas fa-clipboard-list"></i> Requisition Ledger</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Date Range -->
+                <div class="date-range-group">
+                    <label><i class="fas fa-calendar-alt"></i> Select Date Range</label>
+                    <div class="date-inputs">
+                        <div class="date-input">
+                            <label>From Date</label>
+                            <input type="date" name="from_date" id="from_date">
+                        </div>
+                        <div class="date-input">
+                            <label>To Date</label>
+                            <input type="date" name="to_date" id="to_date">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Category Selection -->
+                <div class="category-group">
+                    <label><i class="fas fa-tags"></i> Filter by Category</label>
+                    <select name="category">
+                        <option value="">All Categories</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat.id }}">
+                                {{ cat.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- File Type Selection -->
+                <div class="filetype-group">
+                    <label><i class="fas fa-file-alt"></i> Select Export Format</label>
+                    <div class="filetype-options">
+                        <div class="filetype-card" data-value="csv">
+                            <i class="fas fa-file-csv"></i>
+                            <div class="filetype-name">CSV</div>
+                            <div class="filetype-desc">Comma Separated Values</div>
+                            <input type="radio" name="file_type" value="csv">
+                        </div>
+                        <div class="filetype-card" data-value="xlsx">
+                            <i class="fas fa-file-excel"></i>
+                            <div class="filetype-name">Excel</div>
+                            <div class="filetype-desc">Microsoft Excel Format</div>
+                            <input type="radio" name="file_type" value="xlsx">
+                        </div>
+                        <div class="filetype-card" data-value="pdf">
+                            <i class="fas fa-file-pdf"></i>
+                            <div class="filetype-name">PDF</div>
+                            <div class="filetype-desc">Print Ready Document</div>
+                            <input type="radio" name="file_type" value="pdf">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="submit-section">
+                    <button type="submit" class="btn-generate">
+                        <i class="fas fa-download"></i>
+                        Generate Report
+                    </button>
+                </div>
+                
+                <!-- Info Section -->
+                <div class="info-section">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Reports are generated in real-time. Large datasets may take a few moments to process.</span>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <p>Generating your report...</p>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set default dates (last 30 days)
+        const today = new Date();
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+        
+        const fromDateInput = document.getElementById('from_date');
+        const toDateInput = document.getElementById('to_date');
+        
+        if (!fromDateInput.value) {
+            fromDateInput.value = thirtyDaysAgo.toISOString().split('T')[0];
+        }
+        if (!toDateInput.value) {
+            toDateInput.value = today.toISOString().split('T')[0];
+        }
+        
+        // File type card selection
+        const filetypeCards = document.querySelectorAll('.filetype-card');
+        
+        filetypeCards.forEach(card => {
+            const radio = card.querySelector('input[type="radio"]');
+            
+            card.addEventListener('click', function(e) {
+                // Don't trigger if clicking on radio directly
+                if (e.target.type === 'radio') return;
+                
+                // Uncheck all radios in this group
+                filetypeCards.forEach(c => {
+                    c.querySelector('input[type="radio"]').checked = false;
+                    c.classList.remove('selected');
+                });
+                
+                // Check this radio
+                radio.checked = true;
+                card.classList.add('selected');
+            });
+            
+            // If radio is checked by default, mark card as selected
+            if (radio.checked) {
+                card.classList.add('selected');
+            }
+            
+            // Handle radio change
+            radio.addEventListener('change', function() {
+                filetypeCards.forEach(c => {
+                    c.classList.remove('selected');
+                });
+                if (this.checked) {
+                    card.classList.add('selected');
+                }
+            });
+        });
+        
+        // Form submission with loading overlay
+        const form = document.getElementById('reportForm');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        
+        form.addEventListener('submit', function(e) {
+            // Validate that a ledger type is selected
+            const ledgerTypeSelected = document.querySelector('input[name="ledger_type"]:checked');
+            if (!ledgerTypeSelected) {
+                e.preventDefault();
+                alert('Please select a ledger type (Receipt or Requisition)');
+                return;
+            }
+            
+            // Validate that a file type is selected
+            const fileTypeSelected = document.querySelector('input[name="file_type"]:checked');
+            if (!fileTypeSelected) {
+                e.preventDefault();
+                alert('Please select an export format (CSV, Excel, or PDF)');
+                return;
+            }
+            
+            // Validate date range
+            const fromDate = document.getElementById('from_date').value;
+            const toDate = document.getElementById('to_date').value;
+            
+            if (fromDate && toDate && fromDate > toDate) {
+                e.preventDefault();
+                alert('From Date cannot be greater than To Date');
+                return;
+            }
+            
+            // Show loading overlay
+            loadingOverlay.classList.add('active');
+        });
+        
+        // Quick date range buttons (optional)
+        function addQuickDateButtons() {
+            const dateRangeGroup = document.querySelector('.date-range-group');
+            const quickButtons = document.createElement('div');
+            quickButtons.style.marginTop = '10px';
+            quickButtons.style.display = 'flex';
+            quickButtons.style.gap = '8px';
+            quickButtons.style.flexWrap = 'wrap';
+            
+            const ranges = [
+                { label: 'Today', days: 0 },
+                { label: 'Last 7 Days', days: 7 },
+                { label: 'Last 30 Days', days: 30 },
+                { label: 'Last 90 Days', days: 90 }
+            ];
+            
+            ranges.forEach(range => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = range.label;
+                btn.style.background = 'white';
+                btn.style.border = '1px solid #e0e0e0';
+                btn.style.borderRadius = '20px';
+                btn.style.padding = '4px 12px';
+                btn.style.fontSize = '0.75rem';
+                btn.style.cursor = 'pointer';
+                btn.style.transition = 'all 0.3s ease';
+                
+                btn.addEventListener('mouseenter', () => {
+                    btn.style.background = '#667eea';
+                    btn.style.color = 'white';
+                    btn.style.borderColor = '#667eea';
+                });
+                
+                btn.addEventListener('mouseleave', () => {
+                    btn.style.background = 'white';
+                    btn.style.color = '#333';
+                    btn.style.borderColor = '#e0e0e0';
+                });
+                
+                btn.addEventListener('click', () => {
+                    const end = new Date();
+                    const start = new Date();
+                    start.setDate(end.getDate() - range.days);
+                    
+                    fromDateInput.value = start.toISOString().split('T')[0];
+                    toDateInput.value = end.toISOString().split('T')[0];
+                });
+                
+                quickButtons.appendChild(btn);
+            });
+            
+            dateRangeGroup.appendChild(quickButtons);
+        }
+        
+        addQuickDateButtons();
+    });
+</script>
+{% endblock %}

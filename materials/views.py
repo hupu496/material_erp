@@ -1,10 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
 from datetime import date
 from masters.models import Category, SubCategory, WorkSpots, UnitMaster,PartyMaster
 from .models import MaterialMaster,MaterialReceipt,MaterialRequisition,MaterialOutward
 import base64
 from django.core.files.base import ContentFile
+from django.contrib.auth.decorators import login_required
+
 
 def material_master(request, pk=None):
     instance = None
@@ -81,6 +84,7 @@ def load_subcategory(request):
     ).values('id','sub_category')
 
     return JsonResponse(list(subcategory), safe=False)
+@login_required
 def material_receipt(request, pk=None):
     instance = None
     if pk:
@@ -106,7 +110,7 @@ def material_receipt(request, pk=None):
                 'total_stock': int(total_stock), # Change to DecimalField later if needed
                 'receive_from': request.POST.get('receive_from') or '',
                 'vehicle_no': request.POST.get('vehicle_no') or '',
-                'receiver': request.POST.get('receiver') or '',
+                'receiver': request.user.username,
                 'remarks': request.POST.get('remarks') or '',
             }
 
@@ -393,4 +397,5 @@ def material_outward_delete(request, pk):
     if request.method == "POST":
         outward.delete()
     return redirect('material_outward')
+
 # report

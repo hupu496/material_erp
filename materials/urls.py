@@ -18,6 +18,7 @@ urlpatterns = [
     path('outward/<int:pk>/', views.material_outward, name='material_outward'),          # Edit
     path('outward/delete/<int:pk>/', views.material_outward_delete, name='material_outward_delete'),
     path('outward/fetch-receipt/', views.fetch_receipt_by_entry, name='fetch_receipt_by_entry'),
+
    
 
 ]

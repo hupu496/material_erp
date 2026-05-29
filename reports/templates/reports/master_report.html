@@ -33,16 +33,33 @@
                         </div>
                     </div>
                 </div>
+<div class="mb-4">
+    <label class="form-label fw-bold">Category</label>
 
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Type</label>
-                    <select name="type" class="form-select form-control-modern" style="height: 45px;">
-                        <option value="">-- All Types --</option>
-                        {% for t in types %}
-                        <option value="{{ t }}">{{ t }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+    <select name="category" id="category"
+            class="form-select form-control-modern"
+            style="height:45px;">
+
+        <option value="">-- All Categories --</option>
+
+        {% for cat in categories %}
+        <option value="{{ cat.id }}">
+            {{ cat.name }}
+        </option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="mb-4">
+    <label class="form-label fw-bold">Sub Category</label>
+
+    <select name="subcategory" id="subcategory"
+            class="form-select form-control-modern"
+            style="height:45px;">
+
+        <option value="">-- All Sub Categories --</option>
+    </select>
+</div>
 
                 <div class="mb-4">
                     <label class="form-label fw-bold">Download Format</label>
@@ -68,5 +85,38 @@
         </div>
     </div>
 </div>
+<script>
+document.getElementById("category").addEventListener("change", function () {
 
+    const categoryId = this.value;
+
+    const subcategory =
+        document.getElementById("subcategory");
+
+    subcategory.innerHTML =
+        '<option value="">-- All Sub Categories --</option>';
+
+    if (!categoryId) return;
+
+    fetch(`/reports/load-subcategories/?category=${categoryId}`)
+
+        .then(response => response.json())
+
+        .then(data => {
+
+            data.forEach(sub => {
+
+                const option =
+                    document.createElement("option");
+
+                option.value = sub.id;
+
+                option.textContent =
+                    sub.sub_category;
+
+                subcategory.appendChild(option);
+            });
+        });
+});
+</script>
 {% endblock %}

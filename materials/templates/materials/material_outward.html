@@ -887,6 +887,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const vehicleNo = document.getElementById('vehicleno');
     const issuedto =document.getElementById('issuedto')
     const vendor = document.getElementById('vendor');
+    const issuer= document.getElementById('issuer');
     
     
     let fetchInProgress = false;
@@ -971,6 +972,7 @@ function fetchReceiptDetails(type, value) {
                 poInput.value = data.po || '';
                 vehicleNo.value = data.vehicle_no || '';
                 issuedto.value = data.receive_from_name || '';
+                issuer.value=data.receiver || '';
                 vendor.innerHTML = '<option value="">-- Select Party --</option>';
 
 if (data.parties && data.parties.length > 0) {

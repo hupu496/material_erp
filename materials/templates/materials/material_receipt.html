@@ -514,12 +514,17 @@
 
                     <div class="col-md-6">
                         <div class="floating-label">
-                            <label><i class="fas fa-user-check me-1"></i> Receiver</label>
-                            <input name="receiver" class="form-control-modern"
-                                   value="{% if instance %}{{ instance.receiver }}{% endif %}">
+                            <label>
+                                <i class="fas fa-user-check me-1"></i> Receiver
+                            </label>
+
+                            <input type="text"
+       name="receiver"
+       class="form-control-modern"
+       value="{% if instance %}{{ instance.receiver }}{% else %}{{ request.user.username }}{% endif %}"
+       {% if not instance %}readonly{% endif %}>
                         </div>
                     </div>
-
                     <div class="col-md-12">
                         <div class="floating-label">
                             <label><i class="fas fa-pen-alt me-1"></i> Remarks</label>
@@ -820,13 +825,16 @@ document.getElementById("category").addEventListener("change", function() {
     fetch(`/materials/load-parties/?category=${categoryId}`)
         .then(response => response.json())
         .then(data => {
+         console.log(data); // check here
+
+        partySelect.innerHTML = '<option value="">-- Select Party --</option>';
             data.forEach(party => {
                
-                const option = document.createElement("option");
-                option.value = party.id;
-                option.textContent = party.name;
-                partySelect.appendChild(option);
-                console.log(option)
+            const option = document.createElement("option");
+            option.value = party.id;
+            option.textContent = party.name;
+
+            partySelect.appendChild(option);
             });
         })
         .catch(error => {
@@ -846,30 +854,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ====================== Filter Parties by Category ======================
-document.getElementById("category").addEventListener("change", function() {
-    const categoryId = this.value;
-    const partySelect = document.getElementById("receive_from");
 
-    // Reset party dropdown
-    partySelect.innerHTML = '<option value="">-- Select Party --</option>';
-
-    if (!categoryId) return;
-
-    fetch(`/materials/load-parties/?category=${categoryId}`)
-        .then(response => response.json())
-        .then(data => {
-            data.forEach(party => {
-                const option = document.createElement("option");
-                option.value = party.id;
-                option.textContent = party.name;
-                partySelect.appendChild(option);
-            });
-        })
-        .catch(error => {
-            console.error('Error loading parties:', error);
-            partySelect.innerHTML = '<option value="">Error loading parties</option>';
-        });
-});
 
 // For Edit Mode - Trigger category change to load parties
 document.addEventListener('DOMContentLoaded', function() {
