@@ -713,13 +713,20 @@
                 <div class="col-md-6">
                     <div class="floating-label">
                         <label><i class="fas fa-cubes me-2"></i> Total Nos (Available Stock) <span class="text-danger">*</span></label>
-                        <input id="total_stock" name="total_stock"  type="text" value="{% if instance %}{{ instance.total_stock }}{% endif %}">
+                        <input id="total_nos" name="total_nos"  type="text" value="{% if instance %}{{ instance.total_nos }}{% endif %}">
                         <div class="form-hint" style="font-size: 0.7rem; margin-top: 0.25rem; margin-left: 1rem; color: #718096;">
                             <i class="fas fa-info-circle"></i> Auto-filled with available stock from inventory
                         </div>
                     </div>
                 </div>
-
+                 <div class="col-md-6">
+                    <div class="floating-label">
+                        <label><i class="fas fa-user me-2"></i> Requisition nos <span class="text-danger">*</span></label>
+                        <input name="requisition_nos" class="form-control-modern"
+                               value="{% if instance %}{{ instance.requisition_nos }}{% endif %}" 
+                               required data-tooltip="Person requesting the material" placeholder="Enter requistions nos">
+                    </div>
+                </div>
                 <!-- Requisition By -->
                 <div class="col-md-6">
                     <div class="floating-label">
@@ -787,9 +794,9 @@
                         <td><i class="fas fa-user-circle me-1" style="color: #667eea;"></i> {{ req.requisition_by }}</td>
                         <td>
                             <div class="action-buttons">
-                                <a href="{% url 'material_requisition' req.pk %}" class="btn-edit" data-tooltip="Edit requisition">
+                                <!-- <a href="{% url 'material_requisition' req.pk %}" class="btn-edit" data-tooltip="Edit requisition">
                                     <i class="fas fa-edit"></i> Edit
-                                </a>
+                                </a> -->
                                 <form method="post" action="{% url 'material_requisition_delete' req.pk %}" 
                                       style="display:inline;" 
                                       onsubmit="return confirm('⚠️ Are you sure you want to delete this requisition? This action cannot be undone.')">
@@ -923,7 +930,7 @@ function fetchReceiptDetails(params) {
         setValue('receiver', data.receiver);
 
         // IMPORTANT FIELDS
-        setValue('total_stock', data.total_stock);
+        setValue('total_nos', data.totalno);
         setValue('remarks', data.remarks);
             }
             else {

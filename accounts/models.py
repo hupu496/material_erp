@@ -55,3 +55,10 @@ class PartyMaster(models.Model):
     added_on=models.DateTimeField(auto_now_add=True)
 
     status=models.BooleanField(default=True)
+
+class SystemActivation(models.Model):
+    activated = models.BooleanField(default=False)
+    activation_code = models.CharField(max_length=100, blank=True, null=True)
+    activated_on = models.DateTimeField(auto_now_add=True)
+class SystemSetting(models.Model):
+    first_use_date = models.DateField(auto_now_add=True)

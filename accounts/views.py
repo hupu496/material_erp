@@ -4,6 +4,7 @@ from django.contrib.auth import logout
 from masters.models import Category
 from django.db.models import Sum, F
 from materials.models import MaterialMaster, MaterialReceipt, MaterialRequisition, MaterialOutward
+from .models import SystemActivation
 def login_view(request):
 
     if request.method == "POST":
@@ -41,6 +42,29 @@ def dashboard(request):
     }
 
     return render(request, 'accounts/dashboard.html', context)
+
 def logout_view(request):
     logout(request)
     return redirect('login')  # or your login page name
+def activate_system(request):
+
+    msg = ""
+
+    if request.method == "POST":
+        code = request.POST.get("code")
+
+        if code == "comsys2026":
+
+            SystemActivation.objects.all().delete()
+
+            SystemActivation.objects.create(
+                activated=True,
+                activation_code=code
+            )
+
+            return redirect("dashboard")  # change your home page
+
+        else:
+            msg = "Invalid Activation Code"
+
+    return render(request, "accounts/activate.html", {"msg": msg})

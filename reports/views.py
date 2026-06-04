@@ -11,11 +11,12 @@ from openpyxl.styles import Font, PatternFill, Border, Side, Alignment
 from django.http import HttpResponse
 from io import BytesIO
 from openpyxl.utils import get_column_letter
-
+from django.db.models import Sum
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 
-
+from django.conf import settings
+import os
 
 
 
@@ -73,6 +74,45 @@ def report_dashboard(request):
 
 
 def generate_report(queryset, report_for, filename, file_format='xlsx'):
+    if file_format == 'pdf':
+
+        context = {
+            'report_title': filename.replace('_', ' '),
+            'generated_on': datetime.now(),
+            'generated_by': 'Admin',
+            'report_for': report_for,
+            'rows': queryset,
+            'logo_path': os.path.join(
+                settings.BASE_DIR,
+                'static/images/images.png'
+            )
+        }
+
+        template = get_template(
+            'reports/master_report_pdf.html'
+        )
+
+        html = template.render(context)
+
+        response = HttpResponse(
+            content_type='application/pdf'
+        )
+
+        response[
+            'Content-Disposition'
+        ] = f'attachment; filename="{filename}.pdf"'
+
+        pisa_status = pisa.CreatePDF(
+            html,
+            dest=response
+        )
+
+        if pisa_status.err:
+            return HttpResponse(
+                'PDF generation failed'
+            )
+
+        return response
 
     if file_format == 'csv':
 
@@ -228,9 +268,6 @@ def generate_report(queryset, report_for, filename, file_format='xlsx'):
                     item.qty,
                     item.critical_qty
                 ])
-
-            
-
         for col in ws.iter_cols(min_row=1, max_row=1):
             for cell in col:
                 cell.font = Font(bold=True)
@@ -392,8 +429,11 @@ def date_wise_ledger(request):
 
                 if ledger_type == "receipt":
 
-                    qty = item.total_stock
-
+                    qty = MaterialMaster.objects.get(id=item.item_id)
+                    unit= UnitMaster.objects.get(id=qty.units_id)
+                  
+                    vendor = PartyMaster.objects.get(id=item.receive_from)
+                    total_qtys=item.totalno
                     report_data.append({
 
                         'sl_no': sl,
@@ -401,21 +441,23 @@ def date_wise_ledger(request):
                         'entry_no': item.entry_no,
                         'challan_no': item.challan_no,
                         'category': item.category,
-                        'item': item.item,
-                        'opening_qty': '-',
-                        'in_use_qty': '-',
-                        'unit': '-',
-                        'vendor': item.receive_from,
+                        'item': item.item.description,
+                        'opening_qty': item.total_stock,
+                        'in_use_qty': qty.qty if qty else '',
+                        'unit': unit.name if unit else '',
+                        'vendor': vendor.name if vendor else '',
                         'vehicle': item.vehicle_no,
                         'receiver': item.receiver,
                         'received_by': item.receiver,
-                        'receipt_qty': qty,
+                        'receipt_qty': total_qtys,
                         'remarks': item.remarks,
                     })
 
                 else:
-
-                    qty = item.total_nos
+                    qty = MaterialMaster.objects.get(id=item.item_id)
+                    unit= UnitMaster.objects.get(id=qty.units_id)
+                    workspot = WorkSpots.objects.get(id=item.work_spots_id)
+                    total_qtys=item.requisition_nos
 
                     report_data.append({
 
@@ -424,32 +466,31 @@ def date_wise_ledger(request):
                         'entry_no': item.entry_no,
                         'challan_no': item.requisition_no,
                         'category': item.category,
-                        'item': item.item,
-                        'opening_qty': '-',
-                        'in_use_qty': '-',
-                        'unit': '-',
-                        'vendor': '-',
+                        'item': item.item.description,
+                        'opening_qty': item.total_nos,
+                        'in_use_qty': qty.qty if qty else '',
+                        'unit': unit.name if unit else '',
+                        'WorkSpot': workspot.name if workspot else '',
                         'vehicle': '-',
                         'receiver': item.requisition_by,
                         'received_by': item.requisition_by,
-                        'receipt_qty': qty,
+                        'receipt_qty': item.requisition_nos,
                         'remarks': item.remarks,
                     })
 
-                total_qty += qty
+                total_qty += int(total_qtys)
                 sl += 1
 
             context = {
 
                 'report_data': report_data,
-
                 'total_receipt_qty': total_qty,
-
                 'company_name': 'Indian Oil Corporation Ltd.',
 
                 'plant_name': 'Material Inventory System',
 
                 'report_title': 'Date Wise Ledger Report',
+                'type' : ledger_type,
 
                 'from_date': from_date,
 
@@ -474,6 +515,82 @@ def date_wise_ledger(request):
         }
     )
 
+def stock_summary_form(request):
+    categories = Category.objects.all()
+    subcategories = SubCategory.objects.all()
 
-def stock_summary(request):
-    return render(request,'reports/stock_summary.html')
+    return render(request, "reports/stock_summary_form.html", {
+        "categories": categories,
+        "subcategories": subcategories,
+    })
+def stock_summary_report(request):
+
+    categories = Category.objects.all()
+    subcategories = SubCategory.objects.all()
+
+    data = []
+    from_date = request.GET.get("from_date")
+    to_date = request.GET.get("to_date")
+    category_id = request.GET.get("category")
+    sub_category_id = request.GET.get("sub_category")
+
+    if from_date and to_date:
+
+        from_date = datetime.strptime(from_date, "%Y-%m-%d").date()
+        to_date = datetime.strptime(to_date, "%Y-%m-%d").date()
+
+        items = MaterialMaster.objects.all()
+
+        if category_id:
+            items = items.filter(category_id=category_id)
+
+        if sub_category_id:
+            items = items.filter(sub_category_id=sub_category_id)
+        
+        for item in items:
+            # ---------------- OPENING RECEIPT ----------------
+            opening_receipt = MaterialReceipt.objects.filter(
+                item=item,
+                issue_date__lt=from_date
+            ).aggregate(total=Sum('totalno'))['total'] or 0
+
+            # ---------------- OPENING ISSUE ----------------
+            opening_issue = MaterialRequisition.objects.filter(
+                item=item,
+                issue_date__lt=from_date
+            ).aggregate(total=Sum('requisition_nos'))['total'] or 0
+
+            opening_qty = item.quantity
+
+            # ---------------- PERIOD RECEIPT ----------------
+            period_receipt = MaterialReceipt.objects.filter(
+                item=item,
+                issue_date__range=(from_date, to_date)
+            ).aggregate(total=Sum('totalno'))['total'] or 0
+
+            # ---------------- PERIOD ISSUE ----------------
+            period_issue = MaterialRequisition.objects.filter(
+                item=item,
+                issue_date__range=(from_date, to_date)
+            ).aggregate(total=Sum('requisition_nos'))['total'] or 0
+
+            # ---------------- CLOSING ----------------
+            closing_qty = opening_qty + period_receipt - period_issue
+            
+            data.append({
+                "category": item.category.name,
+                "sub_category": item.sub_category.sub_category,
+                "description": item.description,
+                "unit": item.units.name,
+                "critical_qty": item.critical_qty,
+                "opening_qty": item.quantity,
+                "receipt": period_receipt,
+                "issue": period_issue,
+                "closing_qty": closing_qty,
+            })
+
+    return render(request, "reports/stock_summary.html", {
+        "data": data,
+        "categories": categories,
+        "subcategories": subcategories,
+    })

@@ -134,7 +134,10 @@
             cursor:pointer;
             margin-bottom:20px;
         }
-
+        .company-logo{
+            width:100px;
+            height:70px;
+        }
         @media print {
 
             .download-btn{
@@ -171,12 +174,7 @@
 
 }
 
-.company-logo{
 
-    width:70px;
-    height:auto;
-
-}
 
 /* ================= CENTER ================= */
 
@@ -367,17 +365,29 @@
                     <th>Sl.No</th>
                     <th>Date</th>
                     <th>Entry No</th>
+                     {% if type == 'receipt' %}
                     <th>Challan No</th>
+                     {% else %}
+                     <th>Requisition No</th>
+                     {% endif %}
                     <th>Category</th>
                     <th>Item</th>
                     <th>Opening Qty</th>
                     <th>In Use Qty</th>
                     <th>Unit</th>
-                    <th>Vendor</th>
+                    {% if type == 'receipt' %}
+                     <th>Vendor</th>
                     <th>Vehicle</th>
                     <th>Receiver</th>
                     <th>Received by</th>
                     <th>Receipt Qty</th>
+                    {% else %}
+                    <th>Work Spots</th>
+                    <th>Other Plant</th>
+                    <th>Issuer</th>>
+                    <th>Issued Qty</th>
+                    {% endif %}
+                    
                     <th>Remarks</th>
                 </tr>
             </thead>
@@ -393,11 +403,19 @@
                     <td>{{ row.opening_qty }}</td>
                     <td>{{ row.in_use_qty }}</td>
                     <td>{{ row.unit }}</td>
+                     {% if type == 'receipt' %}
                     <td style="text-align:left;">{{ row.vendor }}</td>
                     <td>{{ row.vehicle }}</td>
                     <td>{{ row.receiver }}</td>
                     <td>{{ row.received_by }}</td>
                     <td><strong>{{ row.receipt_qty }}</strong></td>
+                    {% else %}
+                    <td>{{ row.WorkSpot }}</td>
+                    <td>-</td>
+                    <td>{{ row.received_by|default:"-" }}</td>
+                    <td><strong>{{ row.receipt_qty|default:"0" }}</strong></td>
+
+                     {% endif %}
                     <td style="text-align:left;">{{ row.remarks }}</td>
                 </tr>
                 {% empty %}

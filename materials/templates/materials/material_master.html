@@ -240,14 +240,7 @@
                             </div>
                         </div>
                         
-                        <div class="col-md-6">
-                            <div class="floating-label">
-                                <label>Rate</label>
-                               <input name="rate" class="form-control form-control-modern" 
-                                       value="{% if instance %}{{ instance.rate }}{% endif %}" 
-                                       placeholder="Enter rate" type="number">
-                            </div>
-                        </div>
+                       
                         
                         <div class="col-md-6">
                             <div class="floating-label">
@@ -265,7 +258,7 @@
                         
                         <div class="col-md-4">
                             <div class="floating-label">
-                                <label>Qty</label>
+                                <label>In Use Qty</label>
                                 <input name="qty"value="{% if instance %}{{ instance.qty }}{% endif %}" class="form-control form-control-modern" placeholder="Quantity" type="number">
                             </div>
                         </div>
@@ -322,11 +315,10 @@
         </div>
 
         <!-- Hidden input for captured image (base64) -->
-        <input type="hidden" name="captured_photo" id="captured-photo-data">
-    </div>
-</div>
+                <input type="hidden" name="captured_photo" id="captured-photo-data">
             </div>
-            
+        </div>
+            </div>
             <!-- Save Button -->
             <div class="text-center mt-4">
                 <button type="submit" class="btn-save">
@@ -347,7 +339,9 @@
                     <th>Sub Category</th>
                     <th>Description</th>
                     <th>Qty</th>
-                    <th>Rate</th>
+                    <!-- <th>Rate</th> -->
+                    <th>In Use Qty</th>
+                    <th>Critical Qty</th>
                     <th>Photo</th>
                     <th>Actions</th>
                 </tr>
@@ -360,7 +354,9 @@
                     <td>{{row.sub_category.sub_category}}</td>
                     <td>{{row.description}}</td>
                     <td>{{row.quantity}}</td>
-                    <td>&#8377;{{row.rate}}</td>
+                    <td>{{row.qty}}</td>
+                    <td>{{row.critical_qty}}</td>
+                    <!-- <td>&#8377;{{row.rate}}</td> -->
                     <td>
                         {% if row.photo %}
                         <img src="{{row.photo.url}}" width="50" height="50" style="border-radius: 10px; object-fit: cover;">

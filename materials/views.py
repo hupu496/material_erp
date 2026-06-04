@@ -7,6 +7,7 @@ from .models import MaterialMaster,MaterialReceipt,MaterialRequisition,MaterialO
 import base64
 from django.core.files.base import ContentFile
 from django.contrib.auth.decorators import login_required
+from django.db.models import F
 
 
 def material_master(request, pk=None):
@@ -29,7 +30,6 @@ def material_master(request, pk=None):
             'work_spots_id': request.POST.get('workspots'),
             'description': request.POST.get('description'),
             'units_id': request.POST.get('units'),
-            'rate': request.POST.get('rate'),
             'quantity': request.POST.get('quantity'),
             'rackno': request.POST.get('rackno'),
             'qty': request.POST.get('qty'),
@@ -89,15 +89,13 @@ def material_receipt(request, pk=None):
     instance = None
     if pk:
         instance = get_object_or_404(MaterialReceipt, pk=pk)
-
     if request.method == "POST":
         try:
             totalno = int(request.POST.get('totalno') or 0)
             rate = float(request.POST.get('rate') or 0)
             total_stock = float(request.POST.get('total_stock') or 0)
-
             data = {
-                'po':request.POST.get('po'),
+                'po':request.POST.get('po') or '',
                 'issue_date': request.POST.get('issue_date'),
                 'entry_no': int(request.POST.get('entry_no') or 0),
                 'challan_no': request.POST.get('challan_no') or '',
@@ -113,13 +111,17 @@ def material_receipt(request, pk=None):
                 'receiver': request.user.username,
                 'remarks': request.POST.get('remarks') or '',
             }
-
             if instance:
                 for key, value in data.items():
                     setattr(instance, key, value)
                 instance.save()
             else:  # Create
                 MaterialReceipt.objects.create(**data)
+                MaterialMaster.objects.filter(
+                    id=request.POST.get('item')
+                ).update(
+                    qty=F('qty') + totalno
+                )
 
             return redirect('material_receipt')
 
@@ -135,6 +137,17 @@ def material_receipt(request, pk=None):
     receipts = MaterialReceipt.objects.select_related(
         'category', 'sub_category', 'item'
     ).order_by('-issue_date')
+    for receipt in receipts:
+        receipt.party_name = '-'
+
+        if receipt.receive_from:
+            party = PartyMaster.objects.filter(
+                id=int(receipt.receive_from)
+            ).first()
+
+            if party:
+                receipt.party_name = party.name  # change field name if needed
+                
 
     return render(request, 'materials/material_receipt.html', {
         'categories': categories,
@@ -186,10 +199,10 @@ def material_requisition(request, pk=None):
                 'work_spots_id': request.POST.get('work_spots'),
                 'item_id': request.POST.get('item'),
                 'total_nos': int(request.POST.get('total_nos') or 0),
+                'requisition_nos': request.POST.get('requisition_nos') or '',  # FIXED
                 'requisition_by': request.POST.get('requisition_by') or '',
                 'remarks': request.POST.get('remarks') or '',
             }
-
             if instance:  # Edit Mode
                 for key, value in data.items():
                     setattr(instance, key, value)

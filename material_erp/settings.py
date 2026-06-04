@@ -51,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'accounts.middleware.ActivationMiddleware',
 ]
 
 ROOT_URLCONF = 'material_erp.urls'

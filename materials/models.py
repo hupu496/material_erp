@@ -92,6 +92,8 @@ class MaterialRequisition(models.Model):
     item = models.ForeignKey(MaterialMaster,on_delete=models.CASCADE)
 
     total_nos = models.IntegerField()
+    
+    requisition_nos = models.IntegerField()
 
     requisition_by = models.CharField(max_length=100)
 

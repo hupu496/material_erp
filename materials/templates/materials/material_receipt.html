@@ -444,6 +444,8 @@
                                 <option value="{{m.id}}" 
                                         data-rate="{{ m.rate|default:0 }}"
                                         data-rackno="{{ m.rackno|default:'' }}"
+                                        data-quantity ="{{m.quantity|default:''}}"
+                                        data-qty="{{m.qty|default:''}}"
                                         {% if instance and instance.item_id == m.id %}selected{% endif %}>
                                     {{ m.description }} - {{ m.category.name }}
                                 </option>
@@ -466,7 +468,7 @@
                         <div class="floating-label">
                             <label><i class="fas fa-rupee-sign me-1"></i> Rate</label>
                             <input name="rate" id="rate" type="number" step="0.01" class="form-control-modern"
-                                   value="{% if instance %}{{ instance.rate }}{% endif %}" readonly>
+                                   value="{% if instance %}{{ instance.rate }}{% endif %}">
                         </div>
                     </div>
 
@@ -475,7 +477,7 @@
                         <div class="floating-label">
                             <label><i class="fas fa-archive me-1"></i> Rack No</label>
                             <input name="rackno" id="rackno" class="form-control-modern"
-                                   value="{% if instance %}{{ instance.rackno }}{% endif %}" readonly>
+                                   value="{% if instance %}{{ instance.rackno }}{% endif %}" >
                         </div>
                     </div>
 
@@ -484,10 +486,10 @@
                         <div class="floating-label">
                             <label><i class="fas fa-chart-line me-1"></i> Total Stock</label>
                             <input name="total_stock" id="total_stock" type="number" step="0.01" 
-                                   class="form-control-modern" readonly placeholder="Auto Calculated">
+                                   class="form-control-modern" readonly  placeholder="Total Stock">
                         </div>
                     </div>
-
+                      <div id="stockError" class="text-danger mt-1" style="display:none;"></div>
                     <!-- Remaining fields -->
                  <div class="col-md-6">
                     <div class="floating-label">
@@ -571,9 +573,10 @@
                     <th>Item</th>
                     <th>Total Nos</th>
                     <th>Rate</th>
+                   
                     <th>Total Stock</th>
                     <th>Received From</th>
-                    <th>Actions</th>
+                    <!-- <th>Actions</th> -->
                 </tr>
             </thead>
             <tbody>
@@ -594,15 +597,16 @@
                     <td>{{ receipt.totalno }}</td>
                     <td>₹{{ receipt.rate|floatformat:2 }}</td>
                     <td><strong>₹{{ receipt.total_stock|floatformat:2 }}</strong></td>
-                    <td>{{ receipt.receive_from }}</td>
-                    <td>
-                        <!-- Edit Button -->
+                    
+                    <td>{{ receipt.party_name }}</td>
+                    <!-- <td>
+                       
                         <a href="{% url 'material_receipt' receipt.pk %}" 
                            class="btn btn-sm btn-warning me-2">
                             <i class="fas fa-edit"></i> Edit
                         </a>
                         
-                        <!-- Delete Button -->
+                       
                         <form method="post" 
                               action="{% url 'material_receipt_delete' receipt.pk %}" 
                               style="display:inline;"
@@ -612,7 +616,7 @@
                                 <i class="fas fa-trash"></i> Delete
                             </button>
                         </form>
-                    </td>
+                    </td> -->
                 </tr>
                 {% empty %}
                 <tr>
@@ -681,6 +685,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+
+
     // Form Validation
     function validateForm() {
         let isValid = true;
@@ -723,16 +729,23 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Form Submit Handler
     if (form) {
-        form.addEventListener('submit', function(e) {
-            if (!validateForm()) {
-                e.preventDefault();
-                showNotification('Please fill all required fields marked with *', 'error');
-                return;
-            }
-            
-            submitBtn.classList.add('loading');
-            submitBtn.disabled = true;
-        });
+    form.addEventListener('submit', function(e) {
+
+    if (!validateStock()) {
+        e.preventDefault();
+        showNotification('Total Nos cannot be greater than available stock', 'error');
+        return;
+    }
+
+    if (!validateForm()) {
+        e.preventDefault();
+        showNotification('Please fill all required fields marked with *', 'error');
+        return;
+    }
+
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+});
     }
     
     // Real-time validation
@@ -759,6 +772,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const racknoInput = document.getElementById('rackno');
     const totalnoInput = document.getElementById('totalno');
     const totalStockInput = document.getElementById('total_stock');
+    
+    
 
     // When Item is selected → Auto fill Rate and Rack No
     if (itemSelect) {
@@ -768,12 +783,17 @@ document.addEventListener('DOMContentLoaded', function() {
             if (selectedOption.value) {
                 const rate = selectedOption.getAttribute('data-rate') || 0;
                 const rackno = selectedOption.getAttribute('data-rackno') || '';
+                const totalstock = selectedOption.getAttribute('data-quantity') || '';
+                const qty=selectedOption.getAttribute('data-qty') || 0;
                 
-                rateInput.value = parseFloat(rate).toFixed(2);
+                
+               
                 racknoInput.value = rackno;
+                totalStockInput.value = totalstock-qty;
+               
                 
                 // Recalculate total stock immediately
-                calculateTotalStock();
+               
             } else {
                 rateInput.value = '';
                 racknoInput.value = '';
@@ -782,23 +802,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Auto calculate Total Stock = Total Nos × Rate
-    function calculateTotalStock() {
-        const totalNo = parseFloat(totalnoInput.value) || 0;
-        const rate = parseFloat(rateInput.value) || 0;
-        totalStockInput.value = (totalNo * rate).toFixed(2);
-    }
-
-    if (totalnoInput && rateInput && totalStockInput) {
-        totalnoInput.addEventListener('input', calculateTotalStock);
-        rateInput.addEventListener('input', calculateTotalStock);
-    }
+   
 
     // Trigger calculation on page load if editing
-    if (totalnoInput && rateInput) {
-        calculateTotalStock();
-    }
-    
+  
     // Trigger subcategory load for edit mode
     if (categorySelect && categorySelect.value && subcategorySelect.options.length <= 1) {
         const event = new Event('change');
@@ -864,6 +871,100 @@ document.addEventListener('DOMContentLoaded', function() {
         const event = new Event('change');
         categorySelect.dispatchEvent(event);
     }
+});
+function validateStock() {
+    const totalNo = parseFloat(totalnoInput.value) || 0;
+    const totalStock = parseFloat(totalStockInput.value) || 0;
+    const errorDiv = document.getElementById('stockError');
+    console.log(totalStock)
+
+    if (totalNo > totalStock) {
+        errorDiv.style.display = 'block';
+        errorDiv.innerHTML = `Please enter value less than or equal to available stock (${totalStock})`;
+
+        totalnoInput.classList.add('error');
+        submitBtn.disabled = true;
+        return false;
+    } else {
+        errorDiv.style.display = 'none';
+        totalnoInput.classList.remove('error');
+        submitBtn.disabled = false;
+        return true;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    const totalnoInput = document.getElementById('totalno');
+    const totalStockInput = document.getElementById('total_stock');
+    const submitBtn = document.getElementById('submitBtn');
+    const receiptForm = document.getElementById('receiptForm');
+    const errorDiv = document.getElementById('stockError');
+
+    function validateStock() {
+
+        const totalNo = parseFloat(totalnoInput.value) || 0;
+        const totalStock = parseFloat(totalStockInput.value) || 0;
+
+        if (totalNo > totalStock) {
+
+            errorDiv.style.display = 'block';
+            errorDiv.innerHTML =
+                `Total Nos (${totalNo}) cannot be greater than Available Stock (${totalStock})`;
+
+            totalnoInput.style.border = '2px solid red';
+            totalnoInput.style.backgroundColor = '#fff5f5';
+
+            submitBtn.disabled = true;
+            submitBtn.style.cursor = 'not-allowed';
+            submitBtn.style.opacity = '0.6';
+
+            return false;
+
+        } else {
+
+            errorDiv.style.display = 'none';
+
+            totalnoInput.style.border = '';
+            totalnoInput.style.backgroundColor = '';
+
+            submitBtn.disabled = false;
+            submitBtn.style.cursor = 'pointer';
+            submitBtn.style.opacity = '1';
+
+            return true;
+        }
+    }
+
+    // Check while typing
+    totalnoInput.addEventListener('input', validateStock);
+
+    // Check when clicking outside
+    totalnoInput.addEventListener('blur', validateStock);
+
+    // Check when stock value changes
+    totalStockInput.addEventListener('change', validateStock);
+
+    // Prevent submit if invalid
+    receiptForm.addEventListener('submit', function (e) {
+
+        if (!validateStock()) {
+
+            e.preventDefault();
+
+            totalnoInput.focus();
+
+            alert(
+                'Total Nos should be less than or equal to Available Stock.'
+            );
+
+            return false;
+        }
+    });
+
+    // Trigger validation on page load
+    validateStock();
+
 });
 </script>
 {% endblock %}

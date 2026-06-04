@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Summary Report | Inventory Management</title>
+    <!-- Load static files tag - preserved for Django context -->
+    {% load static %}
+    <style>
+        /* GLOBAL PRINT & SCREEN STYLES */
+        @page {
+            size: A4 landscape;
+            margin: 1.5cm;
+        }
+        body {
+            font-family: 'DejaVu Sans', 'Arial', sans-serif;
+            font-size: 9px;
+            color: #333;
+            line-height: 1.3;
+            background: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+        }
+        /* ========= HEADER & LOGO (LEFT ALIGNED LOGO) ========= */
+        .main-header {
+            width: 100%;
+            border: 1px solid #000;
+            margin-bottom: 18px;
+            background: #fff;
+        }
+        .top-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 10px;
+            border-bottom: 1px solid #000;
+            flex-wrap: wrap;
+        }
+        /* LEFT section: logo + maybe extra text */
+        .header-left {
+            width: 18%;
+            text-align: left;
+            display: flex;
+            align-items: center;
+        }
+        .company-logo {
+            width: 85px;
+            height: auto;
+            max-height: 70px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+        /* CENTER: titles */
+        .header-center {
+            width: 64%;
+            text-align: center;
+        }
+        .company-title {
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #003366;
+            margin: 0;
+        }
+        .location-name {
+            font-size: 13px;
+            margin-top: 4px;
+            font-weight: 500;
+            color: #1e466e;
+        }
+        .report-heading {
+            font-size: 15px;
+            font-weight: bold;
+            margin-top: 5px;
+            text-transform: uppercase;
+            text-decoration: underline;
+            color: #222;
+        }
+        /* RIGHT side: date/version */
+        .header-right {
+            width: 18%;
+            text-align: right;
+            font-size: 10px;
+            font-weight: 500;
+        }
+        .date-box {
+            font-weight: bold;
+            background: #f4f4f4;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        /* second row: additional period / printed info */
+        .sub-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            font-size: 10px;
+            background: #f9f9f9;
+            border-bottom: 1px solid #ccc;
+        }
+        .sub-left, .sub-center, .sub-right {
+            flex: 1;
+        }
+        .sub-left {
+            text-align: left;
+            font-weight: 500;
+        }
+        .sub-center {
+            text-align: center;
+            font-weight: bold;
+            color: #2c3e66;
+        }
+        .sub-right {
+            text-align: right;
+            font-style: italic;
+        }
+        /* stock table styles */
+        .stock-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 6px;
+            font-size: 8.5px;
+            table-layout: auto;
+        }
+        .stock-table th,
+        .stock-table td {
+            border: 1px solid #000;
+            padding: 6px 4px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .stock-table th {
+            background-color: #e6e6e6;
+            font-weight: bold;
+            font-size: 8.8px;
+            padding: 7px 3px;
+            letter-spacing: 0.3px;
+            color: #1a1a1a;
+        }
+        .stock-table td {
+            word-break: break-word;
+            font-size: 8.5px;
+        }
+        /* highlight critical quantity row (if any) */
+        .critical-row {
+            background-color: #fff0f0;
+            font-weight: 500;
+        }
+        /* footer & signature */
+        .footer {
+            margin-top: 18px;
+            font-size: 8px;
+        }
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 6px;
+            border-top: 1px dashed #aaa;
+        }
+        .signature-line {
+            text-align: center;
+            width: 220px;
+        }
+        .signature-line .line {
+            border-top: 1px solid #000;
+            margin-top: 28px;
+            padding-top: 5px;
+            font-size: 8px;
+            color: #444;
+        }
+        .total-row {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        .text-left {
+            text-align: left;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .download-btn {
+            padding: 8px 18px;
+            background: #003366;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 18px;
+            font-size: 12px;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .download-btn:hover {
+            background: #002244;
+            transform: scale(1.01);
+        }
+        @media print {
+            .download-btn {
+                display: none;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                margin: 0;
+                width: 100%;
+            }
+            .stock-table th, .stock-table td {
+                padding: 5px 3px;
+            }
+            .main-header {
+                border: 1px solid #000;
+                break-inside: avoid;
+            }
+            .signature-line .line {
+                margin-top: 28px;
+            }
+        }
+        /* responsive touch */
+        @media (max-width: 700px) {
+            .header-left, .header-right {
+                width: 25%;
+            }
+            .header-center {
+                width: 50%;
+            }
+            .company-title {
+                font-size: 14px;
+            }
+        }
+        .badge-critical {
+            background: #ffd9d9;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- PRINT BUTTON (visible on screen only) -->
+    <div style="text-align: right; margin-bottom: 10px;">
+        <button onclick="window.print();" class="download-btn">🖨️ Print / Save PDF</button>
+    </div>
+
+    <!-- HEADER with LEFT LOGO (as per requirement) -->
+    <div class="main-header">
+        <div class="top-header">
+            <!-- LEFT: LOGO (Fixed position left side) -->
+            <div class="header-left">
+                <img src="{% static 'images/images.png' %}" 
+                     alt="Company Logo" 
+                     class="company-logo"
+                     onerror="this.onerror=null; this.src='https://placehold.co/90x70?text=LOGO';">
+                <!-- optional small tagline -->
+            </div>
+            <!-- CENTER: Company & Report info -->
+            <div class="header-center">
+                <div class="company-title">STEELCRAFT INDUSTRIES LTD.</div>
+                <div class="location-name">Kolkata Manufacturing Plant | Unit-II</div>
+                <div class="report-heading">STOCK SUMMARY REPORT</div>
+            </div>
+            <!-- RIGHT: date / reference -->
+            <div class="header-right">
+                <div class="date-box">
+                    {% now "d-M-Y" %}
+                </div>
+                <div style="margin-top: 6px; font-size: 9px;">Version: 2.0</div>
+            </div>
+        </div>
+        <div class="sub-header-row">
+            <div class="sub-left">Inventory as on: {% now "F j, Y" %}</div>
+            <div class="sub-center">📊 Critical Stock Monitor & Reorder Level</div>
+            <div class="sub-right">Generated: {% now "H:i" %} IST</div>
+        </div>
+    </div>
+
+    <!-- STOCK SUMMARY TABLE -->
+    <table class="stock-table" id="stockReportTable">
+        <thead>
+            <tr>
+                <th>S.No</th>
+                <th>Category</th>
+                <th>Sub Category</th>
+                <th>Description</th>
+                <th>Unit</th>
+                <th>Critical Qty</th>
+                <th>Opening</th>
+                <th>Receipt</th>
+                <th>Issue</th>
+                <th>Closing</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data %}
+            <tr {% if row.closing_qty <= row.critical_qty and row.critical_qty > 0 %}class="critical-row"{% endif %}>
+                <td>{{ forloop.counter }}</td>
+                <td class="text-left">{{ row.category|default:"-" }}</td>
+                <td class="text-left">{{ row.sub_category|default:"-" }}</td>
+                <td class="text-left">{{ row.description|default:"-" }}</td>
+                <td>{{ row.unit|default:"NOS" }}</td>
+                <td class="{% if row.closing_qty <= row.critical_qty %}badge-critical{% endif %}">{{ row.critical_qty|default:"0" }}</td>
+                <td>{{ row.opening_qty|default:"0" }}</td>
+                <td>{{ row.receipt|default:"0" }}</td>
+                <td>{{ row.issue|default:"0" }}</td>
+                <td><strong>{{ row.closing_qty|default:"0" }}</strong></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10" style="text-align: center; padding: 28px;">⚠️ No stock data available. Please add inventory records.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        {% if data %}
+        <tfoot>
+            <tr class="total-row">
+                <td colspan="6" style="text-align: right; font-weight: bold;">TOTAL (Closing) →</td>
+                <td style="font-weight: bold;">{{ total_opening|default:"—" }}</td>
+                <td style="font-weight: bold;">{{ total_receipt|default:"—" }}</td>
+                <td style="font-weight: bold;">{{ total_issue|default:"—" }}</td>
+                <td style="font-weight: bold; background:#e0e7ff;">{{ total_closing|default:"—" }}</td>
+            </tr>
+        </tfoot>
+        {% endif %}
+    </table>
+
+    <!-- additional notes / critical alert summary -->
+    {% if critical_items_count > 0 %}
+    <div style="margin-top: 12px; background: #ffe6e6; border-left: 5px solid #cc0000; padding: 6px 10px; font-size: 9px;">
+        ⚠️ <strong>Critical Stock Alert:</strong> {{ critical_items_count }} item(s) have closing quantity at or below critical threshold. Immediate replenishment advised.
+    </div>
+    {% endif %}
+
+    <!-- FOOTER & SIGNATURES (as per classic ledger style) -->
+    <div class="footer">
+        <div class="signatures">
+            <div class="signature-line">
+                <div class="line">Store Keeper</div>
+                <span style="font-size: 8px;">(Signature & Date)</span>
+            </div>
+            <div class="signature-line">
+                <div class="line">Inventory Manager</div>
+                <span style="font-size: 8px;">(Authorised Signatory)</span>
+            </div>
+            <div class="signature-line">
+                <div class="line">Finance / Audit</div>
+                <span style="font-size: 8px;">(Verification)</span>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 12px; font-size: 7px; color: #555;">
+            This is system-generated stock summary report — valid for inventory reconciliation.
+            Critical Qty: Alert level when Closing ≤ Critical Qty.
+        </div>
+    </div>
+</div>
+
+<!-- optional dynamic total calculation script if needed for demo, but relies on backend context -->
+<script>
+    // additional safety: ensure print layout consistency
+    (function() {
+        // for supporting print button already there; but we can make sure that images respect print
+        let logoImg = document.querySelector('.company-logo');
+        if(logoImg && logoImg.complete === false) {
+            logoImg.onerror = function() {
+                this.src = 'https://placehold.co/85x70?text=INVENTORY';
+            };
+        }
+        // highlight closing vs critical visual in case of dynamic data
+        let rows = document.querySelectorAll('#stockReportTable tbody tr');
+        rows.forEach(row => {
+            let criticalTd = row.cells[5];   // Critical Qty column index
+            let closingTd = row.cells[9];    // Closing column index
+            if(criticalTd && closingTd) {
+                let criticalVal = parseFloat(criticalTd.innerText);
+                let closingVal = parseFloat(closingTd.innerText);
+                if(!isNaN(criticalVal) && !isNaN(closingVal) && closingVal <= criticalVal && criticalVal > 0) {
+                    row.classList.add('critical-row');
+                }
+            }
+        });
+    })();
+</script>
+</body>
+</html>

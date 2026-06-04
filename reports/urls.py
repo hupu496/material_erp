@@ -5,7 +5,7 @@ urlpatterns = [
 
     path('', views.report_dashboard, name='report_dashboard'),
   
-    path('stock/', views.stock_summary, name='stock_summary'),
+   
   
     path(
         'load-subcategories/',
@@ -13,7 +13,8 @@ urlpatterns = [
         name='load_subcategories'
     ),
     path('date_wise_ledger/', views.date_wise_ledger, name='date_wise_ledger'),
-    path('stock_summary/', views.stock_summary, name='stock_summary'),
-     
+    path('stock_summary/', views.stock_summary_form, name='stock_summary_form'),
+    path('stock-summary/result/', views.stock_summary_report, name='stock_summary_report'),
+   
 
 ]
